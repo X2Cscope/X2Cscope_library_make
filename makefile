@@ -9,10 +9,17 @@ NUM_OF_PARALLEL_JOBS := 4
 LIB_OUT_DIR_PATH := dist/
 # Output dirs start with underscore
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-include dspic33ck.mk
+# execute all *.mk files
+export LIB_OUT_DIR_PATH
+TARGETS = $(wildcard *.mk)
 
+TOPTARGETS := all clean
 
+$(TOPTARGETS): $(TARGETS)
+$(TARGETS):
+	$(MAKE) -f $@ $(MAKECMDGOALS)
 
+.PHONY: $(TOPTARGETS) $(TARGETS)
 
 else
 #----- Do not change the rest
