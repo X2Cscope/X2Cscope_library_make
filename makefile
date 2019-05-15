@@ -1,12 +1,13 @@
 #--------------------------------------------
 # Makefile based on the following tutorial: http://make.mad-scientist.net/papers/multi-architecture-builds/
-# Only change the include list, if you want add additional targets
+# If new target required just duplicate one of the *.mk file and modify it. Then just execute the make command in the folder.
+# This makefile will call all *.mk file in the current folder and compile all targets defined in *.mk files.
 #--------------------------------------------
 # Global config may be changed
-OPTIMISATION := -O2
-DEFINE_SCOPE_SIZE := SCOPE_SIZE=5000 
 NUM_OF_PARALLEL_JOBS := 4
 LIB_OUT_DIR_PATH := dist/
+#----------------------------------
+# do not change the rest
 # Output dirs start with underscore
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
 # execute all *.mk files
