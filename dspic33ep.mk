@@ -20,7 +20,7 @@ AR := "xc16-ar"
 
 #-----------------------------------------------------
 # Do not change the rest
-MAKETARGET = $(MAKE) -C $(OBJDIR) -f $(CURDIR)/Makefile \
+MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
 	TARGET_FILENAME=$(TARGET_FILENAME) \
 	OBJDIR=$(OBJDIR) \
 	CC=$(CC) \
