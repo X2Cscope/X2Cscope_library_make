@@ -19,6 +19,8 @@ The makefile compiles the X2C Scope source files for the target MCUs.
 1. Modify system path environment to find make: C:\Program Files (x86)\Microchip\MPLABX\\__*v5.20*__\gnuBins\GnuWin32\bin 
 1. Modify system path environment to find XC16 compiler:  C:\Program Files (x86)\Microchip\xc16\\__*v1.36*__\bin
 
+![Path var](doc/SystemVariables.png)
+
 #### Execute
 Open cmd in the root folder and execute "make" command. The main makefile will call all \*.mk file in the folder and compile all targets.
 
