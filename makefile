@@ -6,12 +6,20 @@
 # Global config may be changed
 NUM_OF_PARALLEL_JOBS := 4
 LIB_OUT_DIR_PATH := dist/
+
+# compilers
+
+XC16_CC := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-gcc.exe"
+XC16_AR := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-ar.exe"
+
+XC32_CC := "C:\Program Files\Microchip\xc32\v2.50\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\v2.50\bin\xc32-ar.exe"
 #----------------------------------
 # do not change the rest
 # Output dirs start with underscore
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
 # execute all *.mk files
-export LIB_OUT_DIR_PATH
+export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR
 TARGETS = $(wildcard *.mk)
 
 TOPTARGETS := all clean

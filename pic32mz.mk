@@ -15,8 +15,8 @@ DEFINE_SCOPE_SIZE := SCOPE_SIZE=5000
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := "xc32-gcc"
-AR := "xc32-ar"
+CC := $(XC32_CC)
+AR := $(XC32_AR)
 
 #-----------------------------------------------------
 # DO not change the rest

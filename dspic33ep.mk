@@ -15,8 +15,8 @@ DEFINE_SCOPE_SIZE := SCOPE_SIZE=5000
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := "xc16-gcc"
-AR := "xc16-ar"
+CC := $(XC16_CC)
+AR := $(XC16_AR)
 
 #-----------------------------------------------------
 # Do not change the rest
