@@ -9,11 +9,11 @@ LIB_OUT_DIR_PATH := dist/
 
 # compilers
 
-XC16_CC := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-gcc.exe"
-XC16_AR := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-ar.exe"
+XC16_CC := "C:\Program Files\Microchip\xc16\v2.00\bin\xc16-gcc.exe"
+XC16_AR := "C:\Program Files\Microchip\xc16\v2.00\bin\xc16-ar.exe"
 
-XC32_CC := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-gcc.exe"
-XC32_AR := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-ar.exe"
+XC32_CC := "C:\Program Files\Microchip\xc32\v4.00\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\v4.00\bin\xc32-ar.exe"
 #----------------------------------
 # do not change the rest
 # Output dirs start with underscore
