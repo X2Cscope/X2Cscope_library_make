@@ -1,6 +1,6 @@
 #include "X2CScopeWrapper.h"
 
-void X2CScope_Initialise() {
+void X2CScope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
      //X2C
     initTableStruct();
     initSerialGeneric(&interface);
@@ -13,13 +13,13 @@ void X2CScope_Initialise() {
     linkSerial((tProtocol*)&protocol, &interface);
     TableStruct->DSPState = PRG_LOADED_STATE;
 
-    initVersionInfo(TableStruct, (uint16)0x0001);
+    initVersionInfo(TableStruct, appVersion, compilationDate);
     TableStruct->TFncTable = blockFunctionTable;
     TableStruct->TParamTable = parameterIdTable;
     
     initSerial(&interface);
     
-    X2C_Init();
+    X2C_Init(scopeSize);
 }
 
 void X2CScope_Communicate() {

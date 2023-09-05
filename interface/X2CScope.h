@@ -26,8 +26,26 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include <xc.h>
 #include <stdint.h>
+
+#ifndef SCOPE_SIZE
+#define SCOPE_SIZE 5000
+#endif
+
+#ifndef APP_VERSION
+#define APP_VERSION 1
+#endif
+
+typedef const struct compilationDate_type{
+	uint8_t date[11];
+	uint8_t time[8];
+}compilationDate_t;
+
+/** Initialise X2Cscope buffer and LNET protocoll
+ */
+void X2CScope_Initialise(uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
+
 /* External X2Cscope API functions that must be used in the applications  */
 void X2CScope_Init(void); // Init X2Cscope and hook communication interfaces.
 /* Below functions are implemented in X2Cscope library */

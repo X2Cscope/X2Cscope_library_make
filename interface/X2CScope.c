@@ -23,8 +23,10 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 #include "X2CScopeComm.h"
 #include "X2CScope.h"
 
+compilationDate_t compilationDate = {__DATE__, __TIME__};
+
 void X2CScope_Init(void)
 {
     X2CScope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
-    X2CScope_Initialise();
+    X2CScope_Initialise(SCOPE_SIZE, APP_VERSION, compilationDate);
 }

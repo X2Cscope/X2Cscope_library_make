@@ -28,13 +28,11 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 extern "C" {
 #endif
     
-#include <stdint.h>
 #include <xc.h>
+#include <stdint.h>
 /* Functions implemented in the X2Cscope library  */
 
-/** Initialise X2Cscope buffer and LNET protocoll
- */
-void X2CScope_Initialise(void);
+
 /**
  */
 void X2CScope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), \
