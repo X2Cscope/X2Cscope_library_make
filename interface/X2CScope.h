@@ -29,10 +29,12 @@ extern "C" {
 #include <xc.h>
 #include <stdint.h>
 
+//X2Cscope buffer size in bytes, uses the specified bytes from RAM
 #ifndef SCOPE_SIZE
 #define SCOPE_SIZE 5000
 #endif
 
+//X2Cscope Get Device Info service, 2 bytes
 #ifndef APP_VERSION
 #define APP_VERSION 1
 #endif

@@ -23,6 +23,11 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 #include "X2CScopeComm.h"
 #include "X2CScope.h"
 
+// SCOPE_SIZE is defined in X2CScope.h, it is the size of the buffer that is sent to the host
+int8_t ScopeArray[SCOPE_SIZE]; 
+
+// compalitionDate_t is defined in X2CScope.h
+// it can be read out by the Get Device Info X2Cscope service
 compilationDate_t compilationDate = {__DATE__, __TIME__};
 
 void X2CScope_Init(void)
