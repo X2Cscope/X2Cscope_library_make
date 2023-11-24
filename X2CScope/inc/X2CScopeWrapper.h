@@ -26,8 +26,8 @@ static tSerial interface;
 static tLNet protocol;
 static uint8 bufferLNet[LNET_BUFFERSIZE];
 
-void X2CScope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate);
-void X2CScope_Communicate();
-void X2CScope_Update();
+void X2Cscope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate);
+void X2Cscope_Communicate();
+void X2Cscope_Update();
 
 #endif

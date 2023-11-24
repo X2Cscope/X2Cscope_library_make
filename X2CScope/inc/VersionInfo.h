@@ -10,7 +10,7 @@
 #define __VERSIONINFO_H__
 
 #include "CommonFcts.h"
-#include "../../interface/X2CScope.h"
+#include "../../interface/X2Cscope.h"
 /* public prototypes */
 void initVersionInfo(volatile tTableStruct* tblStruct, const uint16 appVersion, compilationDate_t compilationDate);
 

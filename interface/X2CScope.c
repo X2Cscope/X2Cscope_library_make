@@ -18,20 +18,20 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 */
 
 /**
- * This file shows example for X2CScope_Init implementation.
+ * This file shows example for X2Cscope_Init implementation.
  */
-#include "X2CScopeComm.h"
-#include "X2CScope.h"
+#include "X2CscopeComm.h"
+#include "X2Cscope.h"
 
-// SCOPE_SIZE is defined in X2CScope.h, it is the size of the buffer that is sent to the host
+// SCOPE_SIZE is defined in X2Cscope.h, it is the size of the buffer that is sent to the host
 int8_t ScopeArray[SCOPE_SIZE]; 
 
-// compalitionDate_t is defined in X2CScope.h
+// compalitionDate_t is defined in X2Cscope.h
 // it can be read out by the Get Device Info X2Cscope service
 compilationDate_t compilationDate = {__DATE__, __TIME__};
 
-void X2CScope_Init(void)
+void X2Cscope_Init(void)
 {
-    X2CScope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
-    X2CScope_Initialise(SCOPE_SIZE, APP_VERSION, compilationDate);
+    X2Cscope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
+    X2Cscope_Initialise(SCOPE_SIZE, APP_VERSION, compilationDate);
 }

@@ -46,13 +46,13 @@ typedef const struct compilationDate_type{
 
 /** Initialise X2Cscope buffer and LNET protocoll
  */
-void X2CScope_Initialise(uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
+void X2Cscope_Initialise(uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
 
 /* External X2Cscope API functions that must be used in the applications  */
-void X2CScope_Init(void); // Init X2Cscope and hook communication interfaces.
+void X2Cscope_Init(void); // Init X2Cscope and hook communication interfaces.
 /* Below functions are implemented in X2Cscope library */
-void X2CScope_Communicate(void); // Communicate with X2Cscope GUI on PC side (Call in idle loop)
-void X2CScope_Update(void); // Sample point of scope functionality (Call with fixed periods)
+void X2Cscope_Communicate(void); // Communicate with X2Cscope GUI on PC side (Call in idle loop)
+void X2Cscope_Update(void); // Sample point of scope functionality (Call with fixed periods)
 
 #ifdef __cplusplus
 }

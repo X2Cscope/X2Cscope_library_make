@@ -1,6 +1,6 @@
-#include "X2CScopeWrapper.h"
+#include "X2CscopeWrapper.h"
 
-void X2CScope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
+void X2Cscope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
      //X2C
     initTableStruct();
     initSerialGeneric(&interface);
@@ -22,11 +22,11 @@ void X2CScope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilat
     X2C_Init(scopeSize);
 }
 
-void X2CScope_Communicate() {
+void X2Cscope_Communicate() {
      protocol.pCommunicate((tProtocol*)&protocol);
 }
 
-void X2CScope_Update() {
+void X2Cscope_Update() {
     X2C_Update();
 }
 
@@ -35,7 +35,7 @@ static uint8_t (*receiveSerialFcn)();
 static uint8_t (*isReceiveDataAvailableFcn)();
 static uint8_t (*isSendReadyFcn)();
 
-void X2CScope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), 
+void X2Cscope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), 
         uint8_t (*isReceiveDataAvailableFcnPntr)(), uint8_t (*isSendReadyFcnPntr)()) {
     sendSerialFcn = sendSerialFcnPntr;
     receiveSerialFcn = receiveSerialFcnPntr;

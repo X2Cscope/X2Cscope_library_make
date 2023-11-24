@@ -1,4 +1,4 @@
-/* This file is derived from am X2C generated file, modified for use with the X2CScope Plugin */
+/* This file is derived from am X2C generated file, modified for use with the X2Cscope Plugin */
 /* This file is part of X2C. http://www.mechatronic-simulation.org/                                                   */
 
 #include "X2C.h"

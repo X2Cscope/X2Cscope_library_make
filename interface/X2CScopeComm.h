@@ -35,10 +35,10 @@ extern "C" {
 
 /**
  */
-void X2CScope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), \
+void X2Cscope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), \
         uint8_t (*isReceiveDataAvailableFcnPntr)(), uint8_t (*isSendReadyFcnPntr)());
 
-/* Functions below must be implemented by the X2Cscope user. Typically in X2CScopeComm.c */
+/* Functions below must be implemented by the X2Cscope user. Typically in X2CscopeComm.c */
 void sendSerial(uint8_t data);
 uint8_t receiveSerial(void);
 uint8_t isReceiveDataAvailable(void);
