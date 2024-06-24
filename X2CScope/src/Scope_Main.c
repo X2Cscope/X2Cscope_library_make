@@ -13,7 +13,7 @@ static uint8 isTriggerEvent(SCOPE_MAIN *pTScope, uint64 curTrgValue);
 static uint64 getTriggerValue(SCOPE_MAIN *pTScope);
 static void sampleData(SCOPE_MAIN *pTScope);
 
-ALIGNTYPE ScopeArray[SCOPE_SIZE];
+//extern ALIGNTYPE ScopeArray[];
 
 #if defined(__COMPILER_CODEWARRIOR_ECLIPSE__)
 #pragma push
@@ -44,7 +44,7 @@ static tBlockFunctions* getBlockFunction(const tBlockFunctions* blockFuncTable, 
 /************************************************/
 /*  Scope_Main_Init                             */
 /************************************************/
-void Scope_Main_Init(SCOPE_MAIN *pTScope)
+void Scope_Main_Init(SCOPE_MAIN *pTScope, void* scopeArray,  uint16_t scope_size)
 {
 	uint8 i;
 
@@ -55,7 +55,7 @@ void Scope_Main_Init(SCOPE_MAIN *pTScope)
 		pTScope->dataSize[i] = (uint8)0;
 	}
 
-	pTScope->arrayAddr = (void*)ScopeArray;
+	pTScope->arrayAddr = (void*)scopeArray;
 	pTScope->trgLevel = (int32)0;
 	pTScope->trgLastValue = (int32)0;
 	pTScope->trgAddr = (void*)0;
@@ -72,9 +72,10 @@ void Scope_Main_Init(SCOPE_MAIN *pTScope)
 	pTScope->trgEventPos = (int32)0;
 	pTScope->trgCountReached = (uint8)0;
 	pTScope->trgCount = (uint32)0;
-	pTScope->maxUsedLength = SCOPE_SIZE;
+	pTScope->maxUsedLength = (uint32)scope_size;
 	pTScope->trgEdge = EDGE_RISING;
-	pTScope->arraySize = SCOPE_SIZE;
+	pTScope->arraySize = (uint32)scope_size;
+	pTScope->scopeSize = (uint32)scope_size;
 
 	TableStruct->piScope = pTScope;
 }
@@ -107,7 +108,7 @@ void Scope_Main_Update(SCOPE_MAIN *pTScope)
 
                 /* if size of next data size would exceed SCOPE_SIZE, the */
                 /* offline sampling mode will be stopped (change to idle state) */
-                if ((pTScope->offlinePtr + pTScope->dataSizeTotal) > SCOPE_SIZE)
+                if ((pTScope->offlinePtr + pTScope->dataSizeTotal) > pTScope->scopeSize)
                 {
                     pTScope->state = SCOPE_IDLE;
                 }
@@ -134,7 +135,7 @@ void Scope_Main_Update(SCOPE_MAIN *pTScope)
 			{
 				pTScope->stfCnt = (uint16)0;
 				/* reset array ptr if next dataset would exceed scope buffer size */
-				if (pTScope->offlinePtr + pTScope->dataSizeTotal > SCOPE_SIZE)
+				if (pTScope->offlinePtr + pTScope->dataSizeTotal > pTScope->scopeSize)
 				{
 					pTScope->offlinePtr = (int32)0;
 				}
@@ -223,7 +224,7 @@ void Scope_Main_Update(SCOPE_MAIN *pTScope)
             {
                 pTScope->stfCnt = (uint16)0;
 
-				if ((pTScope->offlinePtr + pTScope->dataSizeTotal) > SCOPE_SIZE)
+				if ((pTScope->offlinePtr + pTScope->dataSizeTotal) > pTScope->scopeSize)
 				{
 					pTScope->offlinePtr = (uint32)0;
 				}
@@ -417,8 +418,8 @@ uint8 Scope_Main_Save(SCOPE_MAIN *pTScope, uint8 *ucData, uint8 ucFRMlen)
 #error DATA WIDTH NOT DEFINED
 #endif
 
-          pTScope->maxUsedLength = SCOPE_SIZE - \
-        		  (SCOPE_SIZE % pTScope->dataSizeTotal);
+          pTScope->maxUsedLength = pTScope->scopeSize - \
+        		  (pTScope->scopeSize % pTScope->dataSizeTotal);
 
           ptr += (uint8)5;
           i++;

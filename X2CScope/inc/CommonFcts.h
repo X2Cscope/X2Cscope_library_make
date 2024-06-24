@@ -185,6 +185,7 @@ typedef struct {
 	uint32 trgCount;						/** Absolute value of trgDelay, for comparison if trigger delay values have been sampled */
 	uint32 maxUsedLength;					/** Maximum used length of data array */
 	tTrgEdgeType trgEdge;					/** Trigger edge (rising, falling) */
+	uint16 scopeSize;						/** Scope block size */
 } SCOPE_MAIN;
 
 /** DSP states */

@@ -18,24 +18,20 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 */
 
 /**
- * This file collects all X2Cscope external application interfaces that can be used.
+ * This file shows example for X2Cscope_Init implementation.
  */
-#ifndef X2CSCOPE_H
-#define X2CSCOPE_H
+#include "X2CscopeComm.h"
+#include "X2Cscope.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// SCOPE_SIZE is defined in X2Cscope.h, it is the size of the buffer that is sent to the host
+int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE]; 
 
-#include <stdint.h>
-/* External X2Cscope API functions that must be used in the applications  */
-void X2CScope_Init(void); // Init X2Cscope and hook communication interfaces.
-/* Below functions are implemented in X2Cscope library */
-void X2CScope_Communicate(void); // Communicate with X2Cscope GUI on PC side (Call in idle loop)
-void X2CScope_Update(void); // Sample point of scope functionality (Call with fixed periods)
+// compalitionDate_t is defined in X2Cscope.h
+// it can be read out by the Get Device Info X2Cscope service
+compilationDate_t compilationDate = {__DATE__, __TIME__};
 
-#ifdef __cplusplus
+void X2Cscope_Init(void)
+{
+    X2Cscope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
+    X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION, compilationDate);
 }
-#endif
-
-#endif

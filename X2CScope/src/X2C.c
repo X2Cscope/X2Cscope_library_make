@@ -1,4 +1,4 @@
-/* This file is derived from am X2C generated file, modified for use with the X2CScope Plugin */
+/* This file is derived from am X2C generated file, modified for use with the X2Cscope Plugin */
 /* This file is part of X2C. http://www.mechatronic-simulation.org/                                                   */
 
 #include "X2C.h"
@@ -26,9 +26,9 @@ const tParameterTable parameterIdTable[] = {
 };
 
 
-void X2C_Init()
+void X2C_Init(void* scopeArray, uint16 scopeSize)
 {
-    Scope_Main_Init(&TScope);
+    Scope_Main_Init(&TScope, scopeArray, scopeSize);
 }
 
 void X2C_Update(void)
