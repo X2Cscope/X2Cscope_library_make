@@ -28,14 +28,14 @@
 
 #define SCOPE_MAIN_FUNCTIONS { SCOPE_MAIN_ID, \
     (void  (*)(void*))Scope_Main_Update, \
-    (void  (*)(void*, uint16))Scope_Main_Init, \
+    (void  (*)(void*, void*, uint16))Scope_Main_Init, \
     (uint8 (*)(void*, uint8*))Scope_Main_Load, \
     (uint8 (*)(void*, uint8*, uint8))Scope_Main_Save, \
 	(void* (*)(void*, uint16))Scope_Main_GetAddress }
 
 /* public prototypes */
 void Scope_Main_Update(SCOPE_MAIN *pTScope);
-void Scope_Main_Init(SCOPE_MAIN *pTScope,void* scopeArray, uint16 scope_size);
+void Scope_Main_Init(SCOPE_MAIN *pTScope,void *scopeArray, uint16 scope_size);
 uint8 Scope_Main_Load(SCOPE_MAIN *pTScope,uint8 *ucData);
 uint8 Scope_Main_Save(SCOPE_MAIN *pTScope,uint8 *ucData, uint8 ucFRMlen);
 void* Scope_Main_GetAddress(const SCOPE_MAIN* block, uint16 elementId);
