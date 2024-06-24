@@ -35,7 +35,7 @@
 
 /* public prototypes */
 void Scope_Main_Update(SCOPE_MAIN *pTScope);
-void Scope_Main_Init(SCOPE_MAIN *pTScope, uint16 scope_size);
+void Scope_Main_Init(SCOPE_MAIN *pTScope,void* scopeArray, uint16 scope_size);
 uint8 Scope_Main_Load(SCOPE_MAIN *pTScope,uint8 *ucData);
 uint8 Scope_Main_Save(SCOPE_MAIN *pTScope,uint8 *ucData, uint8 ucFRMlen);
 void* Scope_Main_GetAddress(const SCOPE_MAIN* block, uint16 elementId);

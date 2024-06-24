@@ -13,7 +13,7 @@ static uint8 isTriggerEvent(SCOPE_MAIN *pTScope, uint64 curTrgValue);
 static uint64 getTriggerValue(SCOPE_MAIN *pTScope);
 static void sampleData(SCOPE_MAIN *pTScope);
 
-extern ALIGNTYPE ScopeArray[];
+//extern ALIGNTYPE ScopeArray[];
 
 #if defined(__COMPILER_CODEWARRIOR_ECLIPSE__)
 #pragma push
@@ -44,7 +44,7 @@ static tBlockFunctions* getBlockFunction(const tBlockFunctions* blockFuncTable, 
 /************************************************/
 /*  Scope_Main_Init                             */
 /************************************************/
-void Scope_Main_Init(SCOPE_MAIN *pTScope, uint16_t scope_size)
+void Scope_Main_Init(SCOPE_MAIN *pTScope, void* scopeArray,  uint16_t scope_size)
 {
 	uint8 i;
 
@@ -55,7 +55,7 @@ void Scope_Main_Init(SCOPE_MAIN *pTScope, uint16_t scope_size)
 		pTScope->dataSize[i] = (uint8)0;
 	}
 
-	pTScope->arrayAddr = (void*)ScopeArray;
+	pTScope->arrayAddr = (void*)scopeArray;
 	pTScope->trgLevel = (int32)0;
 	pTScope->trgLastValue = (int32)0;
 	pTScope->trgAddr = (void*)0;

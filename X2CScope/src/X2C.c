@@ -26,9 +26,9 @@ const tParameterTable parameterIdTable[] = {
 };
 
 
-void X2C_Init(uint16 scopeSize)
+void X2C_Init(void* scopeArray, uint16 scopeSize)
 {
-    Scope_Main_Init(&TScope, scopeSize);
+    Scope_Main_Init(&TScope, scopeArray, scopeSize);
 }
 
 void X2C_Update(void)

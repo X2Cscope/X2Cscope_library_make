@@ -1,6 +1,6 @@
 #include "X2CscopeWrapper.h"
 
-void X2Cscope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
+void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
      //X2C
     initTableStruct();
     initSerialGeneric(&interface);
@@ -19,7 +19,7 @@ void X2Cscope_Initialise(uint16_t scopeSize, const uint16_t appVersion, compilat
     
     initSerial(&interface);
     
-    X2C_Init(scopeSize);
+    X2C_Init(scopeArray,scopeSize);
 }
 
 void X2Cscope_Communicate() {

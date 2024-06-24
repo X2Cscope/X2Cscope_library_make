@@ -30,13 +30,13 @@ extern "C" {
 #include <stdint.h>
 
 //X2Cscope buffer size in bytes, uses the specified bytes from RAM
-#ifndef SCOPE_SIZE
-#define SCOPE_SIZE 5000
+#ifndef X2CSCOPE_BUFFER_SIZE
+#define X2CSCOPE_BUFFER_SIZE 5000
 #endif
 
 //X2Cscope Get Device Info service, 2 bytes
-#ifndef APP_VERSION
-#define APP_VERSION 1
+#ifndef X2CSCOPE_APP_VERSION
+#define X2CSCOPE_APP_VERSION 1
 #endif
 
 typedef const struct compilationDate_type{
@@ -46,7 +46,7 @@ typedef const struct compilationDate_type{
 
 /** Initialise X2Cscope buffer and LNET protocoll
  */
-void X2Cscope_Initialise(uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
+void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
 
 /* External X2Cscope API functions that must be used in the applications  */
 void X2Cscope_Init(void); // Init X2Cscope and hook communication interfaces.

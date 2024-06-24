@@ -33,5 +33,5 @@ compilationDate_t compilationDate = {__DATE__, __TIME__};
 void X2Cscope_Init(void)
 {
     X2Cscope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
-    X2Cscope_Initialise(SCOPE_SIZE, APP_VERSION, compilationDate);
+    X2Cscope_Initialise((void*)ScopeArray, SCOPE_SIZE, APP_VERSION, compilationDate);
 }
