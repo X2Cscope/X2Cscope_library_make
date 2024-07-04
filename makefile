@@ -14,6 +14,10 @@ XC16_AR := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-ar.exe"
 
 XC32_CC := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-gcc.exe"
 XC32_AR := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-ar.exe"
+
+XC_DSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.10\bin\xc32-gcc.exe"
+XC_DSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.10\bin\xc32-ar.exe"
+
 #----------------------------------
 # do not change the rest
 # Output dirs start with underscore
