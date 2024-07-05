@@ -14,7 +14,7 @@ The makefile compiles the X2C Scope source files for the target MCUs.
 
 #### **Prerequisites**
 
-1. Compilers: XC16 and/or XC32 http://microchip.com/xc
+1. Compilers: XC16 and/or XC32 and/or XC-DSC http://microchip.com/xc
 1. GNU Make: MPLAB X IDE contains it: http://microchip.com/mplabx 
 1. Modify system path environment to make.exe be available in command line: C:\Program Files (x86)\Microchip\MPLABX\\__*v5.20*__\gnuBins\GnuWin32\bin 
 
@@ -31,7 +31,7 @@ Open cmd in the root folder and execute "make" command. The main makefile will c
 Execute "make clean" to delete all obj and lib files.
 
 ### 3. How to create new/custom target
-If new target or custom configuration(Scope_size) required just duplicate one of the \*.mk file and modify the following variables it to the needs:
+If new target or custom configuration(Scope_size) required just duplicate one of the \*.mk file and modify the following variables to the needs:
 1. TARGET_FILENAME - The output filename. (Will be located in the dist folder after compilation.)
 1. OBJDIR - Folder to store the temporary object files. Must start with underscore(_) and must be different than other .mk files!
 1. SET_PROCESSOR - Use XC Readme.html for the list of supported Devices. (xc32\v2.xx\docs)
@@ -39,7 +39,7 @@ If new target or custom configuration(Scope_size) required just duplicate one of
 1. DEFINE_SCOPE_SIZE - Allocated memory area for scope buffer.
 1. OPTIMISATION - Compiler optimisation level
 
-Then just execute the make command in the folder and makefile will call automatikally the newly created .mk file.
+Then just execute the make command in the folder and makefile will call automatically the newly created .mk file.
 
 
 ### 4. Troubleshooting
