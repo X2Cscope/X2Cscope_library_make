@@ -9,21 +9,21 @@ LIB_OUT_DIR_PATH := dist/
 
 # compilers
 
-XC16_CC := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-gcc.exe"
-XC16_AR := "C:\Program Files\Microchip\xc16\v1.60\bin\xc16-ar.exe"
+XC16_CC := "C:\Program Files\Microchip\xc16\v2.10\bin\xc16-gcc.exe"
+XC16_AR := "C:\Program Files\Microchip\xc16\v2.10\bin\xc16-ar.exe"
 
-XC32_CC := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-gcc.exe"
-XC32_AR := "C:\Program Files\Microchip\xc32\v3.00\bin\xc32-ar.exe"
+XC32_CC := "C:\Program Files\Microchip\xc32\v4.10\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\v4.10\bin\xc32-ar.exe"
 
-XC_DSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.10\bin\xc32-gcc.exe"
-XC_DSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.10\bin\xc32-ar.exe"
+XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-gcc.exe"
+XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-ar.exe"
 
 #----------------------------------
 # do not change the rest
 # Output dirs start with underscore
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
 # execute all *.mk files
-export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR
+export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR XCDSC_CC XCDSC_AR
 TARGETS = $(wildcard *.mk)
 
 TOPTARGETS := all clean
