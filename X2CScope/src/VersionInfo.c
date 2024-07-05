@@ -8,12 +8,7 @@
  */
 #include "VersionInfo.h"
 
-const struct {
-	uint8 date[11];
-	uint8 time[8];
-} compilationDate = { __DATE__, __TIME__ };
-
-void initVersionInfo(volatile tTableStruct* tblStruct, uint16 appVersion)
+void initVersionInfo(volatile tTableStruct* tblStruct, const uint16 appVersion, compilationDate_t compilationDate)
 {
 	tblStruct->framePrgVersion = appVersion;
 	tblStruct->framePrgCompDateTime = (uint8*)&compilationDate;

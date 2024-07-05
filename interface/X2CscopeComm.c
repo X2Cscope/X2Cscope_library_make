@@ -21,7 +21,7 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
  * This file implements the X2C Lin protocol connection with MCC Peripheral drivers.
  */
 #include <xc.h>
-#include "X2CScopeComm.h"
+#include "X2CscopeComm.h"
 
 /** 
   @brief

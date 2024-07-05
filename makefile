@@ -37,8 +37,8 @@ $(TARGETS):
 else
 #----- Do not change the rest
 # relative to _OBJ dir
-SRC_DIR := ../X2CScope/src
-INC_DIR := ../X2CScope/inc
+SRC_DIR := ../X2Cscope/src
+INC_DIR := ../X2Cscope/inc
 
 VPATH = $(SRC_DIR)
 
@@ -54,7 +54,7 @@ $(TARGET_FILENAME): $(OBJ_FILES)
 
 %.o: %.c
 	$(info Compiling)
-	${CC} ${SET_PROCESSOR} -D${DEFINE_X2C_MCU_FAMILY} -D${DEFINE_SCOPE_SIZE}  -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
+	${CC} ${SET_PROCESSOR} -D${DEFINE_X2C_MCU_FAMILY} -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
 
 
 #----- Begin Boilerplate

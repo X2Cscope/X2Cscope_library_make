@@ -1,7 +1,7 @@
 #Change the following according the target MCU family
 #---------------------------------------------
 #TARGET_FILENAME and OBJDIR must not be the same in target mk files.
-TARGET_FILENAME := libx2cscope-33ck_mc-elf.a
+TARGET_FILENAME := libx2cscope2-33ck_mc-elf.a
 
 # Object dir must start with underscore!
 OBJDIR := _33CK_MC
