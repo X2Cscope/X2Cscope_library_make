@@ -1,10 +1,10 @@
 #Change the following according the target MCU family
 #---------------------------------------------
 #TARGET_FILENAME and OBJDIR must not be the same in target mk files.
-TARGET_FILENAME := libx2cscope-33ak_mc-elf.a
+TARGET_FILENAME := libx2cscope-33ak_mc512-elf.a
 
 # Object dir must start with underscore!
-OBJDIR := _33AK_MC
+OBJDIR := _33AK_MC512
 
 # Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
 SET_PROCESSOR := -mcpu=33AK512MC510
