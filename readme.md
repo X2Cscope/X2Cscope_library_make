@@ -1,4 +1,4 @@
-Read-me File for making X2C Scope Libraries for MCUs 
+Read-me File for making X2Cscope Libraries for MCUs 
 -----------------------------------------------
 This file contains the following sections:
 1. Summary
@@ -36,7 +36,6 @@ If new target or custom configuration(Scope_size) required just duplicate one of
 1. OBJDIR - Folder to store the temporary object files. Must start with underscore(_) and must be different than other .mk files!
 1. SET_PROCESSOR - Use XC Readme.html for the list of supported Devices. (xc32\v2.xx\docs)
 1. DEFINE_X2C_MCU_FAMILY - Check the X2C Scope header files for details. Keep as it is.
-1. DEFINE_SCOPE_SIZE - Allocated memory area for scope buffer.
 1. OPTIMISATION - Compiler optimisation level
 
 Then just execute the make command in the folder and makefile will call automatically the newly created .mk file.
