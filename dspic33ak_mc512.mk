@@ -1,21 +1,21 @@
 #Change the following according the target MCU family
 #---------------------------------------------
 #TARGET_FILENAME and OBJDIR must not be the same in target mk files.
-TARGET_FILENAME := libx2cscope2-32mx-elf.a
+TARGET_FILENAME := libx2cscope-33ak_mc512-elf.a
 
 # Object dir must start with underscore!
-OBJDIR := _32MX
+OBJDIR := _33AK_MC512
 
-# Compiler specific CPU selection directive (-mcpu=xx -> XC16 -mprocessor=xx -> XC32 )
-SET_PROCESSOR := -mprocessor=32MX250F128B
+# Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
+SET_PROCESSOR := -mcpu=33AK512MC510
 
 # Set MCU family and scope size for X2C Scope
-DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_PIC32__
+DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_DSPIC__
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := $(XC32_CC)
-AR := $(XC32_AR)
+CC := $(XCDSC_CC)
+AR := $(XCDSC_AR)
 
 #-----------------------------------------------------
 # DO not change the rest
@@ -28,7 +28,7 @@ MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
 	DEFINE_X2C_MCU_FAMILY=$(DEFINE_X2C_MCU_FAMILY) \
 	OPTIMISATION=$(OPTIMISATION) \
 	$(MAKECMDGOALS)
-	
+
 .PHONY: $(OBJDIR)
 $(OBJDIR):
 	+@[ -d $(OBJDIR) ] || gnumkdir -p  $(OBJDIR)
