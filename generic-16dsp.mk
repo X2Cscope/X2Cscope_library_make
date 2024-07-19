@@ -1,21 +1,23 @@
-#Change the following according the target MCU family
-#---------------------------------------------
-#TARGET_FILENAME and OBJDIR must not be the same in target mk files.
-TARGET_FILENAME := libx2cscope2-33ch_slave-elf.a
+#-----------------------------------------------------
+# Generic dsPIC33FJ and dsPIC30 16-bit DSP microcontroller makefile
+#-----------------------------------------------------
+#TARGET_FILENAME must not be the same in target mk files.
+TARGET_FILENAME := libx2cscope2-generic-16dsp-dspic33f-dspic30-elf.a
 
 # Object dir must start with underscore!
-OBJDIR := _33CH_Slave
+# THis is a special directory, obj files will be merged in one common lib by the main makefile combine target.
+OBJDIR := _OBJXCDSC
 
-# Compiler specific CPU selection directive (-mcpu=xx -> XC16 -mprocessor=xx -> XC32 )
-SET_PROCESSOR := -mcpu=33CH128MP202S1
+# Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
+SET_PROCESSOR := -mcpu=generic-16dsp
 
 # Set MCU family and scope size for X2C Scope
 DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_DSPIC__
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := $(XC16_CC)
-AR := $(XC16_AR)
+CC := $(XCDSC_CC)
+AR := $(XCDSC_AR)
 
 #-----------------------------------------------------
 # DO not change the rest

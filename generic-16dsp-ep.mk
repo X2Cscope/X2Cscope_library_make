@@ -1,21 +1,23 @@
-#Change the following according the target MCU family
-#---------------------------------------------
-#TARGET_FILENAME and OBJDIR must not be the same in target mk files.
-TARGET_FILENAME := libx2cscope2-33fj-elf.a
+#-----------------------------------------------------
+# Generic dsPIC33EP 16-bit DSP microcontroller makefile
+#-----------------------------------------------------
+#TARGET_FILENAME must not be the same in target mk files.
+TARGET_FILENAME := libx2cscope-generic-16dsp-dspic33e-elf.a
 
 # Object dir must start with underscore!
-OBJDIR := _33FJ
+# THis is a special directory, obj files will be merged in one common lib by the main makefile combine target.
+OBJDIR := _OBJXCDSC
 
-# Compiler specific CPU selection directive (-mcpu=xx -> XC16 -mprocessor=xx -> XC32 )
-SET_PROCESSOR := -mcpu=33FJ32MC204
+# Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
+SET_PROCESSOR := -mcpu=generic-16dsp-ep
 
 # Set MCU family and scope size for X2C Scope
 DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_DSPIC__
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := $(XC16_CC)
-AR := $(XC16_AR)
+CC := $(XCDSC_CC)
+AR := $(XCDSC_AR)
 
 #-----------------------------------------------------
 # DO not change the rest
@@ -28,7 +30,7 @@ MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
 	DEFINE_X2C_MCU_FAMILY=$(DEFINE_X2C_MCU_FAMILY) \
 	OPTIMISATION=$(OPTIMISATION) \
 	$(MAKECMDGOALS)
-	
+
 .PHONY: $(OBJDIR)
 $(OBJDIR):
 	+@[ -d $(OBJDIR) ] || gnumkdir -p  $(OBJDIR)
