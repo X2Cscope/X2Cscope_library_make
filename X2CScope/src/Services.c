@@ -20,6 +20,8 @@
 #define DEVINFO_PROCESSOR_ID ((uint16)0x8220)
 #elif defined(__GENERIC_MICROCHIP_PIC24__)
 #define DEVINFO_PROCESSOR_ID ((uint16)0x8230)
+#elif defined(__GENERIC_MICROCHIP_DSPIC32__)
+#define DEVINFO_PROCESSOR_ID ((uint16)0x8240)
 #elif defined(__GENERIC_ARM_ARMV7__)
 #define DEVINFO_PROCESSOR_ID ((uint16)0x8310)
 #elif defined(__GENERIC_ARM_ARMV6__)
