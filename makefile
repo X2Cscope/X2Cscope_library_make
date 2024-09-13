@@ -36,7 +36,7 @@ combine:
 	$(info Combining XCDSC libs)
 	$(eval XC_DSC_OBJ_FILES := ${wildcard _OBJXCDSC/*.o})
 	$(info obj files to combine: ${XC_DSC_OBJ_FILES})
-	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}libx2cscope2-generic-elf.a  ${XC_DSC_OBJ_FILES}
+	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}libx2cscope2-generic-pic24-dspic33-elf.a  ${XC_DSC_OBJ_FILES}
 
 .PHONY: $(TOPTARGETS) $(TARGETS)
 
