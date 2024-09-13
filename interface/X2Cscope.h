@@ -35,8 +35,10 @@ extern "C" {
 #endif
 
 //X2Cscope Get Device Info service, 2 bytes
+//Application specific, can be customized. 
+//Reserved APP versions, do not use: 0x1000 - 0x3FFF 
 #ifndef X2CSCOPE_APP_VERSION
-#define X2CSCOPE_APP_VERSION 1
+#define X2CSCOPE_APP_VERSION 0x0001
 #endif
 
 typedef const struct compilationDate_type{

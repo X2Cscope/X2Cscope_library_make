@@ -18,7 +18,8 @@
 #define __DATA_WIDTH_16BIT__
 #define __ADDRESS_WIDTH_32BIT__
 
-#elif defined(__GENERIC_ARM_ARMV7__) || defined(__GENERIC_ARM_ARMV6__) || defined(__GENERIC_MICROCHIP_PIC32__) || defined (__GENERIC_MICROCHIP_DSPIC32__)
+#elif defined(__GENERIC_ARM_ARMV7__) || defined(__GENERIC_ARM_ARMV6__) || defined(__GENERIC_MICROCHIP_PIC32__) || \
+    defined(X2C_GENERIC_MICROCHIP_DSPIC33A)
 #define __GENERIC_DEVICE_TYPE__
 #define __DATA_WIDTH_8BIT__
 #define __ADDRESS_WIDTH_32BIT__
