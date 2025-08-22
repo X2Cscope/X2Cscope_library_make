@@ -8,6 +8,7 @@ nbdist/
 .nb-gradle/
 debug/
 run/
+_*/
 
 *.o
 
