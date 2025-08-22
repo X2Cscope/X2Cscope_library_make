@@ -9,11 +9,11 @@ LIB_OUT_DIR_PATH := dist/
 
 # compilers
 
-XC32_CC := "C:\Program Files\Microchip\xc32\v4.35\bin\xc32-gcc.exe"
-XC32_AR := "C:\Program Files\Microchip\xc32\v4.35\bin\xc32-ar.exe"
+XC32_CC := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-ar.exe"
 
-XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-gcc.exe"
-XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-ar.exe"
+XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.21\bin\xc-dsc-gcc.exe"
+XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.21\bin\xc-dsc-ar.exe"
 
 #----------------------------------
 # do not change the rest
@@ -68,7 +68,7 @@ $(TARGET_FILENAME): $(OBJ_FILES)
 #create MCU specific obj files
 ${SET_ARCH}%.o: %.c
 	$(info Compiling)
-	${CC} ${SET_PROCESSOR} -D${DEFINE_X2C_MCU_FAMILY} -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
+	${CC} ${SET_PROCESSOR} ${SET_ARGS} -D${DEFINE_X2C_MCU_FAMILY} -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
 
 
 #----- Begin Boilerplate
