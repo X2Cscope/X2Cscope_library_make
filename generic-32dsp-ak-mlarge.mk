@@ -1,12 +1,12 @@
 #-----------------------------------------------------
-# Generic dsPIC33AK 32-bit DSP microcontroller makefile
+# Generic dsPIC33AK 32-bit DSP microcontroller makefile (MLarge)
 #-----------------------------------------------------
 #TARGET_FILENAME target mk files.
 TARGET_FILENAME := libx2cscope-generic-32dsp-dspic33a-mlarge-elf.a
 
 # Object dir must start with underscore!
-# THis is a special directory, obj files will be merged in one common lib by the main makefile combine target.
-OBJDIR := _OBJXCDSC
+# Separate directory for mlarge variant - creates standalone library
+OBJDIR := _OBJ32DSPAK_MLARGE
 
 # Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
 SET_PROCESSOR := -mcpu=generic-32dsp-ak 

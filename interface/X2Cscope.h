@@ -77,7 +77,8 @@ typedef const struct compilationDate_type{
 
 /** Initialise X2Cscope buffer and LNET protocoll
  */
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, uint16_t appVersion, compilationDate_t compilationDate);
+void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, 
+    uint16_t appVersion, compilationDate_t compilationDate);
 
 /* External X2Cscope API functions that must be used in the applications  */
 void X2Cscope_Init(void); // Init X2Cscope and hook communication interfaces.

@@ -44,7 +44,7 @@ else
 #----- Do not change the rest
 # relative to _OBJ dir
 SRC_DIR := ../X2Cscope/src
-INC_DIR := ../X2Cscope/inc
+INC_DIR := ../X2Cscope/inc -I../interface
 
 VPATH = $(SRC_DIR)
 

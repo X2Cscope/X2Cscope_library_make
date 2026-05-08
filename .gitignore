@@ -9,6 +9,8 @@ nbdist/
 debug/
 run/
 _*/
+.claude/
+.vscode/
 
 *.o
 

@@ -28,7 +28,15 @@
  * $LastChangedDate:: 2024-09-13 13:00:00 +0200#$
  */
 
+#include <stddef.h>
 #include "X2CscopeWrapper.h"
+
+// Static function pointers for UART/Serial interface
+static void (*sendSerialFcn)(uint8_t);
+static uint8_t (*receiveSerialFcn)();
+static uint8_t (*isReceiveDataAvailableFcn)();
+static uint8_t (*isSendReadyFcn)();
+static void (*flushSerialFcn)();
 
 void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
      //X2C
@@ -46,9 +54,9 @@ void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t ap
     initVersionInfo(TableStruct, appVersion, compilationDate);
     TableStruct->TFncTable = blockFunctionTable;
     TableStruct->TParamTable = parameterIdTable;
-    
+
     initSerial(&interface);
-    
+
     X2C_Init(scopeArray,scopeSize);
 }
 
@@ -60,17 +68,27 @@ void X2Cscope_Update() {
     X2C_Update();
 }
 
-static void (*sendSerialFcn)(uint8_t);
-static uint8_t (*receiveSerialFcn)();
-static uint8_t (*isReceiveDataAvailableFcn)();
-static uint8_t (*isSendReadyFcn)();
+void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config) {
+    sendSerialFcn = config->sendSerial;
+    receiveSerialFcn = config->receiveSerial;
+    isReceiveDataAvailableFcn = config->isReceiveDataAvailable;
+    isSendReadyFcn = config->isSendReady;
+    flushSerialFcn = config->flushSerial;  // Can be NULL
+    X2Cscope_Initialise(config->scopeArray, config->scopeSize,
+                         config->appVersion, config->compilationDate);
+}
 
-void X2Cscope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), 
-        uint8_t (*isReceiveDataAvailableFcnPntr)(), uint8_t (*isSendReadyFcnPntr)()) {
+void X2Cscope_HookUARTFunctions(
+    void (*sendSerialFcnPntr)(uint8_t),
+    uint8_t (*receiveSerialFcnPntr)(),
+    uint8_t (*isReceiveDataAvailableFcnPntr)(),
+    uint8_t (*isSendReadyFcnPntr)())
+{
     sendSerialFcn = sendSerialFcnPntr;
     receiveSerialFcn = receiveSerialFcnPntr;
     isReceiveDataAvailableFcn = isReceiveDataAvailableFcnPntr;
     isSendReadyFcn = isSendReadyFcnPntr;
+    flushSerialFcn = NULL;
 }
 
 void sendSerialWrapper(tSerial* serial, uint8 data) {
@@ -89,10 +107,17 @@ uint8_t isSendReadyWrapper(tSerial* serial) {
     return (uint8) isSendReadyFcn();
 }
 
+void flushSerialWrapper(tSerial* serial) {
+    if (flushSerialFcn != NULL) {
+        flushSerialFcn();
+    }
+}
+
 void initSerial(tSerial* serial)
 {
     serial->send = (void (*)(tInterface*, uint8))sendSerialWrapper;
     serial->receive = (uint8 (*)(tInterface*))receiveSerialWrapper;
     serial->isReceiveDataAvailable = (uint8 (*)(tInterface*))isReceiveDataAvailableWrapper;
     serial->isSendReady = (uint8 (*)(tInterface*))isSendReadyWrapper;
+    serial->flush = (void (*)(tInterface*))flushSerialWrapper;
 }

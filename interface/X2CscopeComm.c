@@ -51,10 +51,27 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 #include <xc.h>
 #include "X2CscopeComm.h"
 
-/** 
+/**
+  @brief
+    Add any extra initialization required to the comm layer.
+    This function should be called by the user after X2Cscope_Initialise().
+ */
+void X2Cscope_PostInit(void)
+{
+#error "Implement your post-init function, then delete this line."
+/* Example:
+ * If no extra handling is required, leave this function empty.
+ *
+ * Common use cases:
+ * - Enable UART TX interrupt
+ * - Start DMA transfers
+ * - Initialize protocol-specific state
+ */
+}
+
+/**
   @brief
     Puts the data to the hardware layer. (UART)
-   @param[in] serial Serial interface object. (Not used)
    @param[in] data Data to send 
  */
 void sendSerial(uint8_t data)
@@ -68,9 +85,8 @@ void sendSerial(uint8_t data)
 /** 
   @brief
    Get serial data from hardware. Reset the hardware in case of error. (UART2)
-  @param[in] serial Serial interface object. (Not used)
   @return
-    Return with the received data
+    Return the received data
  */
 uint8_t receiveSerial()
 {
@@ -87,7 +103,6 @@ uint8_t receiveSerial()
 
 /** 
   @brief  Check data availability (UART).
-  @param[in] serial Serial interface object. (Not used)
   @return
     True -> Serial data ready to read.
     False -> No data.
@@ -103,7 +118,6 @@ uint8_t isReceiveDataAvailable()
 /** 
   @brief
    Check output buffer. (UART)
-  @param[in] serial Serial interface object. (Not used)
   @return    
     True -> Transmit buffer is not full, at least one more character can be written.
     False -> Transmit buffer is full.
@@ -114,6 +128,21 @@ uint8_t isSendReady()
 /*Example:
     return (U1STAbits.UTXBF == 0); //Status TX buffer full
 */
+}
+
+/** 
+  @brief
+    Flush the transmit buffer. This function is called when LNet frame is complete.
+   @param[in] serial Serial interface object. (Not used)
+   @param[in] data Data to send 
+ */
+void flushSerial(void)
+{
+#error "Implement your flush function, then delete this line."
+/* Example:
+ * If no extra handling is required, leave this function empty.
+ * If using a buffer to send data, implement the buffer send/flush here.
+ */
 }
 /* *****************************************************************************
  End of File

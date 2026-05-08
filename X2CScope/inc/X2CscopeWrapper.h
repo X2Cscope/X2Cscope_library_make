@@ -39,6 +39,7 @@
 #include "Target.h"
 #include "X2C.h"
 #include "VersionInfo.h"
+#include "X2CscopeComm.h"  /* For X2Cscope_Config_t definition */
 
 /* generated X2C parameter identifier & block function table */
 extern const tBlockFunctions blockFunctionTable[];
@@ -57,6 +58,8 @@ static tLNet protocol;
 static uint8 bufferLNet[LNET_BUFFERSIZE];
 
 void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate);
+void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
+void X2Cscope_HookUARTFunctions(void (*sendSerialFcnPntr)(uint8_t), uint8_t (*receiveSerialFcnPntr)(), uint8_t (*isReceiveDataAvailableFcnPntr)(), uint8_t (*isSendReadyFcnPntr)());
 void X2Cscope_Communicate();
 void X2Cscope_Update();
 
