@@ -58,67 +58,6 @@ extern "C" {
 
 #include <xc.h>
 #include <stdint.h>
-#include "X2Cscope.h"  /* For compilationDate_t */
-
-/* Functions implemented in the X2Cscope library */
-
-/**
- * @brief Full X2Cscope configuration structure
- * Combines communication interface and initialization parameters
- * into a single configuration object.
- */
-typedef struct {
-    /* Communication interface */
-    void (*sendSerial)(uint8_t);              /**< Send single byte */
-    uint8_t (*receiveSerial)(void);           /**< Receive single byte */
-    uint8_t (*isReceiveDataAvailable)(void);  /**< Check if RX data available */
-    uint8_t (*isSendReady)(void);             /**< Check if TX ready */
-    void (*flushSerial)(void);                /**< Flush TX buffer (optional, can be NULL) */
-    /* Scope buffer */
-    void* scopeArray;                         /**< Pointer to scope data buffer */
-    uint16_t scopeSize;                       /**< Size of scope buffer in bytes */
-    /* Application info */
-    uint16_t appVersion;                      /**< Application version identifier */
-    compilationDate_t compilationDate;        /**< Build date/time stamp */
-} X2Cscope_Config_t;
-
-/**
- * @brief Initializer macro for X2Cscope_Config_t
- * Ensures all required fields are provided at compile time.
- * Missing arguments will cause a compiler error.
- *
- * @param send      sendSerial function pointer
- * @param recv      receiveSerial function pointer
- * @param avail     isReceiveDataAvailable function pointer
- * @param ready     isSendReady function pointer
- * @param flush     flushSerial function pointer (use NULL if not needed)
- * @param buf       Pointer to scope data buffer
- * @param bufSize   Size of scope buffer in bytes
- * @param ver       Application version identifier
- * @param compDate  compilationDate_t build timestamp
- */
-#define X2CSCOPE_CONFIG_INIT(send, recv, avail, ready, flush, buf, bufSize, ver, compDate) \
-    { \
-        .sendSerial = (send), \
-        .receiveSerial = (recv), \
-        .isReceiveDataAvailable = (avail), \
-        .isSendReady = (ready), \
-        .flushSerial = (flush), \
-        .scopeArray = (buf), \
-        .scopeSize = (bufSize), \
-        .appVersion = (ver), \
-        .compilationDate = (compDate) \
-    }
-
-/**
- * @brief Initialise X2Cscope using full configuration structure (recommended)
- * @param config Pointer to full configuration structure
- *
- * This is the recommended single-call initialisation interface.
- * It hooks the communication functions and initialises the scope in one step.
- * Use X2CSCOPE_CONFIG_INIT() macro to populate the structure safely.
- */
-void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
 
 /**
  * @brief Legacy 4-parameter UART hook + separate Initialise interface
@@ -128,7 +67,8 @@ void X2Cscope_HookUARTFunctions(
     void (*sendSerialFcnPntr)(uint8_t),
     uint8_t (*receiveSerialFcnPntr)(),
     uint8_t (*isReceiveDataAvailableFcnPntr)(),
-    uint8_t (*isSendReadyFcnPntr)());
+    uint8_t (*isSendReadyFcnPntr)(),
+    void (*flushSerialFcnPntr)());
 
 /* Functions below must be implemented by the X2Cscope user.
  * Typically in X2CscopeComm.c */

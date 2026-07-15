@@ -62,26 +62,6 @@ compilationDate_t compilationDate = {__DATE__, __TIME__};
 
 void X2Cscope_Init(void)
 {
-    /* Recommended: Use X2CSCOPE_CONFIG_INIT macro to ensure all required fields are set */
-    X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-        sendSerial,                  // sendSerial
-        receiveSerial,               // receiveSerial
-        isReceiveDataAvailable,      // isReceiveDataAvailable
-        isSendReady,                 // isSendReady
-        flushSerial,                 // flushSerial (NULL if not needed)
-        (void*)X2CscopeArray,        // scopeArray
-        X2CSCOPE_BUFFER_SIZE,        // scopeSize
-        X2CSCOPE_APP_VERSION,        // appVersion
-        compilationDate              // compilationDate
-    );
-    X2Cscope_InitialiseEx(&config);
-    /* Call user-level post-init function for protocol-specific setup */
-    X2Cscope_PostInit();
-
-    /* Legacy method (still supported for backward compatibility):
-     * X2Cscope_HookUARTFunctions(sendSerial, receiveSerial,
-     *                            isReceiveDataAvailable, isSendReady);
-     * X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-     *                     X2CSCOPE_APP_VERSION, compilationDate);
-     */
+    X2Cscope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady, flushSerial);
+    X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION, compilationDate);
 }

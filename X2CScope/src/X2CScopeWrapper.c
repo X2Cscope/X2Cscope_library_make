@@ -68,27 +68,18 @@ void X2Cscope_Update() {
     X2C_Update();
 }
 
-void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config) {
-    sendSerialFcn = config->sendSerial;
-    receiveSerialFcn = config->receiveSerial;
-    isReceiveDataAvailableFcn = config->isReceiveDataAvailable;
-    isSendReadyFcn = config->isSendReady;
-    flushSerialFcn = config->flushSerial;  // Can be NULL
-    X2Cscope_Initialise(config->scopeArray, config->scopeSize,
-                         config->appVersion, config->compilationDate);
-}
-
 void X2Cscope_HookUARTFunctions(
     void (*sendSerialFcnPntr)(uint8_t),
     uint8_t (*receiveSerialFcnPntr)(),
     uint8_t (*isReceiveDataAvailableFcnPntr)(),
-    uint8_t (*isSendReadyFcnPntr)())
+    uint8_t (*isSendReadyFcnPntr)(),
+    void (*flushSerialFcnPntr)())
 {
     sendSerialFcn = sendSerialFcnPntr;
     receiveSerialFcn = receiveSerialFcnPntr;
     isReceiveDataAvailableFcn = isReceiveDataAvailableFcnPntr;
     isSendReadyFcn = isSendReadyFcnPntr;
-    flushSerialFcn = NULL;
+    flushSerialFcn = flushSerialFcnPntr;
 }
 
 void sendSerialWrapper(tSerial* serial, uint8 data) {
