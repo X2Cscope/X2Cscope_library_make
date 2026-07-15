@@ -25,7 +25,10 @@ TARGETS = $(wildcard *.mk)
 
 TOPTARGETS := all clean
 
-$(TOPTARGETS): $(TARGETS) combine
+all: $(TARGETS) combine
+clean: $(TARGETS)
+	$(info Removing all build directories _*/)
+	$(foreach d,$(wildcard _*/),$(shell rm -rf $(d)))
 $(TARGETS):
 	$(MAKE) -f $@ $(MAKECMDGOALS)
 
@@ -38,7 +41,7 @@ combine:
 	$(info obj files to combine: ${XC_DSC_OBJ_FILES})
 	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}libx2cscope2-generic-pic24-dspic33-elf.a  ${XC_DSC_OBJ_FILES}
 
-.PHONY: $(TOPTARGETS) $(TARGETS)
+.PHONY: $(TOPTARGETS) $(TARGETS) combine
 
 else
 #----- Do not change the rest
