@@ -56,7 +56,7 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
     Add any extra initialization required to the comm layer.
     This function should be called by the user after X2Cscope_Initialise().
  */
-void X2Cscope_PostInit(void)
+void X2CscopeComm_PostInit(void)
 {
 #error "Implement your post-init function, then delete this line."
 /* Example:

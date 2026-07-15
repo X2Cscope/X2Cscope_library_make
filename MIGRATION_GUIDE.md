@@ -11,7 +11,7 @@ This guide explains the X2Cscope initialization API and how to migrate existing 
 - **Single-Call Init**: `X2Cscope_InitialiseEx()` replaces the previous two-step hook + init flow
 - **Compile-Time Safety**: `X2CSCOPE_CONFIG_INIT()` macro ensures all required fields are provided
 - **Optional Flush**: `flushSerial()` callback (can be NULL)
-- **Post-Init Hook**: `X2Cscope_PostInit()` for protocol-specific setup
+- **Post-Init Hook**: `X2CscopeComm_PostInit()` for protocol-specific setup
 
 ### Backward Compatibility
 - **Legacy two-step API still works**: `X2Cscope_HookUARTFunctions()` + `X2Cscope_Initialise()`
@@ -36,7 +36,7 @@ void X2Cscope_Init(void)
         compilationDate              // compilationDate
     );
     X2Cscope_InitialiseEx(&config);
-    X2Cscope_PostInit();
+    X2CscopeComm_PostInit();
 }
 ```
 
@@ -125,13 +125,14 @@ void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize,
 - Maintained for backward compatibility
 - Must be preceded by `X2Cscope_HookUARTFunctions()`
 
-#### X2Cscope_PostInit
+#### X2CscopeComm_PostInit
 ```c
-void X2Cscope_PostInit(void);
+void X2CscopeComm_PostInit(void);
 ```
-- Called after initialization completes
+- User-implemented, called from `X2Cscope_Init()` after `X2Cscope_InitialiseEx()`
 - Implement in `X2CscopeComm.c`
-- Use for UART TX interrupt enable, DMA setup, etc.
+- Use for starting a TCP server, enabling UART TX interrupts, DMA setup, etc.
+- Leave empty if no post-init steps are needed
 
 #### X2Cscope_Communicate
 ```c

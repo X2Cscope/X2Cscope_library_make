@@ -31,12 +31,21 @@
 #include <stddef.h>
 #include "X2CscopeWrapper.h"
 
+/* Debug-build NULL-pointer assertion.
+ * Spins in an infinite loop so a connected debugger immediately identifies
+ * the mis-configured pointer.  Compiled away in release builds (NDEBUG). */
+#ifndef NDEBUG
+#define X2CS_ASSERT_NOT_NULL(ptr) do { if ((ptr) == NULL) { while(1){} } } while(0)
+#else
+#define X2CS_ASSERT_NOT_NULL(ptr) ((void)0)
+#endif
+
 // Static function pointers for UART/Serial interface
-static void (*sendSerialFcn)(uint8_t);
-static uint8_t (*receiveSerialFcn)();
-static uint8_t (*isReceiveDataAvailableFcn)();
-static uint8_t (*isSendReadyFcn)();
-static void (*flushSerialFcn)();
+static void    (*sendSerialFcn)(uint8_t);
+static uint8_t (*receiveSerialFcn)(void);
+static uint8_t (*isReceiveDataAvailableFcn)(void);
+static uint8_t (*isSendReadyFcn)(void);
+static void    (*flushSerialFcn)(void);
 
 void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
      //X2C
@@ -68,18 +77,43 @@ void X2Cscope_Update() {
     X2C_Update();
 }
 
-void X2Cscope_HookUARTFunctions(
-    void (*sendSerialFcnPntr)(uint8_t),
-    uint8_t (*receiveSerialFcnPntr)(),
-    uint8_t (*isReceiveDataAvailableFcnPntr)(),
-    uint8_t (*isSendReadyFcnPntr)(),
-    void (*flushSerialFcnPntr)())
+void X2Cscope_HookUARTFunctions_v5(
+    void    (*sendSerialFcnPntr)(uint8_t),
+    uint8_t (*receiveSerialFcnPntr)(void),
+    uint8_t (*isReceiveDataAvailableFcnPntr)(void),
+    uint8_t (*isSendReadyFcnPntr)(void),
+    void    (*flushSerialFcnPntr)(void))
 {
-    sendSerialFcn = sendSerialFcnPntr;
-    receiveSerialFcn = receiveSerialFcnPntr;
-    isReceiveDataAvailableFcn = isReceiveDataAvailableFcnPntr;
-    isSendReadyFcn = isSendReadyFcnPntr;
-    flushSerialFcn = flushSerialFcnPntr;
+    sendSerialFcn                = sendSerialFcnPntr;
+    receiveSerialFcn             = receiveSerialFcnPntr;
+    isReceiveDataAvailableFcn    = isReceiveDataAvailableFcnPntr;
+    isSendReadyFcn               = isSendReadyFcnPntr;
+    flushSerialFcn               = flushSerialFcnPntr;
+}
+
+void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config)
+{
+    /* Validate required fields in debug builds.
+     * Each NULL check spins forever so a debugger catches the misconfiguration
+     * immediately at the offending pointer. */
+    X2CS_ASSERT_NOT_NULL(config);
+    X2CS_ASSERT_NOT_NULL(config->sendSerial);
+    X2CS_ASSERT_NOT_NULL(config->receiveSerial);
+    X2CS_ASSERT_NOT_NULL(config->isReceiveDataAvailable);
+    X2CS_ASSERT_NOT_NULL(config->isSendReady);
+    X2CS_ASSERT_NOT_NULL(config->scopeArray);
+
+    /* Hook communication functions (flushSerial may be NULL — that is valid) */
+    X2Cscope_HookUARTFunctions_v5(
+        config->sendSerial,
+        config->receiveSerial,
+        config->isReceiveDataAvailable,
+        config->isSendReady,
+        config->flushSerial);
+
+    /* Initialise scope buffer and LNet protocol */
+    X2Cscope_Initialise(config->scopeArray, config->scopeSize,
+                        config->appVersion, config->compilationDate);
 }
 
 void sendSerialWrapper(tSerial* serial, uint8 data) {
