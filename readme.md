@@ -5,6 +5,8 @@ This file contains the following sections:
 2. How to execute
 3. How to create new target
 4. Troubleshooting
+5. API migration
+6. Integration examples
 
 ### 1. Summary
 This folder contains a makefile and \*.mk files for target specification. 
@@ -47,3 +49,36 @@ Then just execute the make command in the folder and makefile will call automati
   * Set Path environment as described in the Prerequisites section. (See at **Prerequisites**)
 * The system cannot find the file specified.
   * Edit makefile and set the correct compiler paths according to your system. (See at **Prerequisites**)
+
+### 5. API migration
+
+If updating from a previous version of the X2Cscope interface files, see
+`MIGRATION_GUIDE.md` for a full description of the new `X2Cscope_InitialiseEx()`
+/ `X2CSCOPE_CONFIG_INIT()` API, the backward-compatible legacy API, and
+migration recommendations.
+
+### 6. Integration examples
+
+The `interface/examples/` folder contains ready-to-use communication layer
+implementations for three transport interfaces. Each example provides
+`X2CscopeComm.h` and `X2CscopeComm.c` — the only files that need to be adapted
+per project — alongside any required peripheral driver files and a `README.md`
+with hardware configuration and integration steps.
+
+| Folder | Interface | Key files included |
+|---|---|---|
+| `interface/examples/uart/` | UART (MCC Melody driver) | `X2CscopeComm.h`, `X2CscopeComm.c` |
+| `interface/examples/can/` | CAN 2.0 (MCC Melody driver) | `X2CscopeComm.h`, `X2CscopeComm.c` |
+| `interface/examples/tcpip/` | TCP/IP over 10BASE-T1S (lwIP) | `X2CscopeComm.h`, `X2CscopeComm.c`, `lwip/tcp_server.h/.c`, `hal/dmaspi.h/.c` |
+
+Copy the contents of the relevant example folder into your project's `X2Cscope/`
+folder alongside `interface/X2Cscope.h` and `interface/X2Cscope.c`, then follow
+the `README.md` in that example folder for MCC configuration and call sequence.
+
+The PC-side tool is [pyX2Cscope](https://github.com/X2Cscope/pyx2cscope/releases):
+
+```
+pip install pyx2cscope
+pyx2cscope        # Qt GUI
+pyx2cscope -w     # Web GUI (browser)
+```

@@ -182,3 +182,18 @@ X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
 For questions or issues:
 - Review example in `interface/X2Cscope.c`
 - Examine template in `interface/X2CscopeComm.c`
+
+## Communication Layer Examples
+
+Complete, ready-to-use `X2CscopeComm.h` and `X2CscopeComm.c` implementations
+are provided under `interface/examples/` for three transport interfaces:
+
+| Folder | Interface |
+|---|---|
+| `interface/examples/uart/` | UART — MCC Melody `uart_drv_interface_t` |
+| `interface/examples/can/` | CAN 2.0 — MCC Melody `can1` driver, ring-buffered RX, 8-byte frame packing |
+| `interface/examples/tcpip/` | TCP/IP — lwIP over 10BASE-T1S; includes `tcp_server` and `dmaspi` driver files |
+
+Each example folder contains a `README.md` with MCC configuration steps,
+hardware requirements, integration checklist, and pyX2Cscope connection
+instructions.
