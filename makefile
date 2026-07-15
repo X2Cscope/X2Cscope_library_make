@@ -9,11 +9,11 @@ LIB_OUT_DIR_PATH := dist/
 
 # compilers
 
-XC32_CC := "C:\Program Files\Microchip\xc32\v4.35\bin\xc32-gcc.exe"
-XC32_AR := "C:\Program Files\Microchip\xc32\v4.35\bin\xc32-ar.exe"
+XC32_CC := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-ar.exe"
 
-XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-gcc.exe"
-XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.20\bin\xc-dsc-ar.exe"
+XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v3.21\bin\xc-dsc-gcc.exe"
+XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v3.21\bin\xc-dsc-ar.exe"
 
 #----------------------------------
 # do not change the rest
@@ -25,7 +25,10 @@ TARGETS = $(wildcard *.mk)
 
 TOPTARGETS := all clean
 
-$(TOPTARGETS): $(TARGETS) combine
+all: $(TARGETS) combine
+clean: $(TARGETS)
+	$(info Removing all build directories _*/)
+	$(foreach d,$(wildcard _*/),$(shell rm -rf $(d)))
 $(TARGETS):
 	$(MAKE) -f $@ $(MAKECMDGOALS)
 
@@ -38,13 +41,13 @@ combine:
 	$(info obj files to combine: ${XC_DSC_OBJ_FILES})
 	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}libx2cscope2-generic-pic24-dspic33-elf.a  ${XC_DSC_OBJ_FILES}
 
-.PHONY: $(TOPTARGETS) $(TARGETS)
+.PHONY: $(TOPTARGETS) $(TARGETS) combine
 
 else
 #----- Do not change the rest
 # relative to _OBJ dir
 SRC_DIR := ../X2Cscope/src
-INC_DIR := ../X2Cscope/inc
+INC_DIR := ../X2Cscope/inc -I../interface
 
 VPATH = $(SRC_DIR)
 
@@ -68,7 +71,7 @@ $(TARGET_FILENAME): $(OBJ_FILES)
 #create MCU specific obj files
 ${SET_ARCH}%.o: %.c
 	$(info Compiling)
-	${CC} ${SET_PROCESSOR} -D${DEFINE_X2C_MCU_FAMILY} -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
+	${CC} ${SET_PROCESSOR} ${SET_ARGS} -D${DEFINE_X2C_MCU_FAMILY} -I${INC_DIR} ${OPTIMISATION} -c $< -o $@ 
 
 
 #----- Begin Boilerplate

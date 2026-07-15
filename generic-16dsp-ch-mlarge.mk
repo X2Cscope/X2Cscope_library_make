@@ -1,0 +1,46 @@
+#-----------------------------------------------------
+# Generic dsPIC33CK and dsPIC33CH 16-bit DSP microcontroller makefile (Mlarge)
+#-----------------------------------------------------
+#TARGET_FILENAME target mk files.
+TARGET_FILENAME := libx2cscope-generic-16dsp-dspic33c-mlarge-elf.a
+
+# Object dir must start with underscore!
+# Separate directory for mlarge variant - creates standalone library
+OBJDIR := _OBJ16DSPCH_MLARGE
+
+# Compiler specific CPU selection directive (-mcpu=xx -> XC-DSC -mprocessor=xx -> XC32 )
+SET_PROCESSOR := -mcpu=generic-16dsp-ch
+
+# Additional arguments for the compiler
+SET_ARGS := "-mlarge-code -mlarge-data"
+
+# Set MCU family and scope size for X2C Scope
+DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_DSPIC__
+
+OPTIMISATION := -O2
+#Compilers to use
+CC := $(XCDSC_CC)
+AR := $(XCDSC_AR)
+
+#-----------------------------------------------------
+# DO not change the rest
+MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
+	TARGET_FILENAME=$(TARGET_FILENAME) \
+	OBJDIR=$(OBJDIR) \
+	CC=$(CC) \
+	AR=$(AR) \
+	SET_PROCESSOR=$(SET_PROCESSOR) \
+	SET_ARGS=$(SET_ARGS) \
+	DEFINE_X2C_MCU_FAMILY=$(DEFINE_X2C_MCU_FAMILY) \
+	OPTIMISATION=$(OPTIMISATION) \
+	$(MAKECMDGOALS)
+
+.PHONY: $(OBJDIR)
+$(OBJDIR):
+	+@[ -d $(OBJDIR) ] || gnumkdir -p  $(OBJDIR)
+	+@$(MAKETARGET)
+
+.PHONY: clean
+clean:
+	rm -rf $(OBJDIR)
+	rm -rf $(LIB_OUT_DIR_PATH)$(TARGET_FILENAME)

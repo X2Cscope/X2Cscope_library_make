@@ -49,19 +49,55 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 
 /**
  * This file shows example for X2Cscope_Init implementation.
+ *
+ * Two initialization styles are shown:
+ *  1. New (recommended): X2CSCOPE_CONFIG_INIT + X2Cscope_InitialiseEx — single call,
+ *     compile-time-safe, all parameters in one place.
+ *  2. Legacy (still supported): X2Cscope_HookUARTFunctions + X2Cscope_Initialise —
+ *     kept for backward compatibility with existing projects.
  */
 #include "X2CscopeComm.h"
 #include "X2Cscope.h"
 
-// SCOPE_SIZE is defined in X2Cscope.h, it is the size of the buffer that is sent to the host
-int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE]; 
+/* Scope data buffer.
+ * Size is controlled by X2CSCOPE_BUFFER_SIZE (default 5000 bytes).
+ * Override by defining X2CSCOPE_BUFFER_SIZE before including X2Cscope.h. */
+int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE];
 
-// compalitionDate_t is defined in X2Cscope.h
-// it can be read out by the Get Device Info X2Cscope service
+/* Build date/time stamp — read out by the X2Cscope "Get Device Info" service. */
 compilationDate_t compilationDate = {__DATE__, __TIME__};
 
 void X2Cscope_Init(void)
 {
-    X2Cscope_HookUARTFunctions(sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady);
-    X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION, compilationDate);
+    /* --- NEW API (recommended for all new projects) ---
+     * X2CSCOPE_CONFIG_INIT requires all 9 parameters. Omitting or reordering
+     * any argument causes a compile-time error, catching the most common
+     * integration mistakes before the code ever runs.
+     * flushSerial is optional: pass NULL if your peripheral does not need it. */
+    X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
+        sendSerial,                 /* send one byte          (required) */
+        receiveSerial,              /* receive one byte       (required) */
+        isReceiveDataAvailable,     /* RX data ready flag     (required) */
+        isSendReady,                /* TX buffer not full     (required) */
+        flushSerial,                /* flush/commit TX buffer (NULL if unused) */
+        (void*)X2CscopeArray,       /* scope data buffer      (required) */
+        X2CSCOPE_BUFFER_SIZE,       /* scope buffer size      (required) */
+        X2CSCOPE_APP_VERSION,       /* app version identifier (required) */
+        compilationDate             /* build timestamp        (required) */
+    );
+    X2Cscope_InitialiseEx(&config);
+    X2CscopeComm_PostInit();
+
+    /* --- LEGACY API (backward compatible, still supported) ---
+     * Use this form if migrating an existing project that already calls
+     * X2Cscope_HookUARTFunctions / X2Cscope_Initialise.
+     * Both 4-argument and 5-argument forms of X2Cscope_HookUARTFunctions
+     * are accepted; the 4-argument form sets flushSerial to NULL.
+     *
+     * X2Cscope_HookUARTFunctions(sendSerial, receiveSerial,
+     *                             isReceiveDataAvailable, isSendReady);
+     * X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
+     *                     X2CSCOPE_APP_VERSION, compilationDate);
+     * X2CscopeComm_PostInit();
+     */
 }

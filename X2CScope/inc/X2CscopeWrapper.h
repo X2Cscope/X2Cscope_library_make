@@ -39,6 +39,7 @@
 #include "Target.h"
 #include "X2C.h"
 #include "VersionInfo.h"
+#include "X2CscopeComm.h"  /* For X2Cscope_Config_t definition */
 
 /* generated X2C parameter identifier & block function table */
 extern const tBlockFunctions blockFunctionTable[];
@@ -56,8 +57,8 @@ static tSerial interface;
 static tLNet protocol;
 static uint8 bufferLNet[LNET_BUFFERSIZE];
 
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate);
-void X2Cscope_Communicate();
-void X2Cscope_Update();
+/* Public API declarations live in interface/X2Cscope.h and interface/X2CscopeComm.h.
+ * No additional declarations needed here — all functions below are defined and
+ * called exclusively within X2CScopeWrapper.c. */
 
 #endif
