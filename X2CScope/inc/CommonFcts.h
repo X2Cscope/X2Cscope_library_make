@@ -263,7 +263,7 @@ struct tTableStruct {
     tProtocol* protocols[MAX_PROTOCOLS];
     
     uint16 framePrgVersion;
-    uint8* framePrgCompDateTime;
+    const uint8_t* framePrgCompDateTime;
 
 	SCOPE_MAIN* piScope;
 

@@ -80,8 +80,8 @@ typedef struct {
     void*    scopeArray;                        /**< Required: Pointer to scope data buffer allocated by the application */
     uint16_t scopeSize;                         /**< Required: Size of scopeArray in bytes (see X2CSCOPE_BUFFER_SIZE) */
     /* Application info */
-    uint16_t         appVersion;                /**< Application version identifier (0x0001 default) */
-    compilationDate_t compilationDate;          /**< Build date/time stamp (__DATE__, __TIME__) */
+    uint16_t                appVersion;          /**< Application version identifier (0x0001 default) */
+    const compilationDate_t *compilationDate;   /**< Pointer to build timestamp — must have static storage duration */
 } X2Cscope_Config_t;
 
 /**
@@ -97,7 +97,7 @@ typedef struct {
  *       sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady,
  *       flushSerial,               // pass NULL if not needed
  *       (void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
- *       X2CSCOPE_APP_VERSION, compilationDate
+  *       X2CSCOPE_APP_VERSION, &compilationDate
  *   );
  *   X2Cscope_InitialiseEx(&config);
  *   X2CscopeComm_PostInit();
@@ -114,50 +114,8 @@ typedef struct {
     .scopeArray               = (buf_),                                  \
     .scopeSize                = (bufSize_),                              \
     .appVersion               = (ver_),                                  \
-    .compilationDate          = (compDate_)                              \
+    .compilationDate          = &(compDate_)                             \
 }
-
-/*---------------------------------------------------------------------------
- * Legacy UART hook API — maintained for backward compatibility.
- *
- * X2Cscope_HookUARTFunctions accepts either 4 or 5 arguments:
- *   4-arg form (original):  send, recv, rxAvail, txReady
- *   5-arg form (extended):  send, recv, rxAvail, txReady, flush
- *
- * The 4-arg form sets flushSerial to NULL internally, matching the original
- * behaviour. New code should use X2Cscope_InitialiseEx() instead.
- *--------------------------------------------------------------------------*/
-
-/** Internal 5-parameter implementation — do not call directly. */
-void X2Cscope_HookUARTFunctions_v5(
-    void    (*sendSerialFcnPntr)(uint8_t),
-    uint8_t (*receiveSerialFcnPntr)(void),
-    uint8_t (*isReceiveDataAvailableFcnPntr)(void),
-    uint8_t (*isSendReadyFcnPntr)(void),
-    void    (*flushSerialFcnPntr)(void));
-
-/** @cond INTERNAL — variadic helper to count arguments */
-#define _X2CS_HOOK_GET6(_1,_2,_3,_4,_5,_6,...) _6
-#define _X2CS_HOOK_NARGS(...) _X2CS_HOOK_GET6(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
-
-#define _X2CS_HOOK4(s,r,a,t)      X2Cscope_HookUARTFunctions_v5(s, r, a, t, NULL)
-#define _X2CS_HOOK5(s,r,a,t,f)    X2Cscope_HookUARTFunctions_v5(s, r, a, t, f)
-#define _X2CS_HOOK_PICK(n,...)    _X2CS_HOOK##n(__VA_ARGS__)
-#define _X2CS_HOOK_DISPATCH(n,...) _X2CS_HOOK_PICK(n, __VA_ARGS__)
-/** @endcond */
-
-/**
- * @brief Hook serial communication functions into the X2Cscope library.
- *
- * Backward-compatible variadic macro. Accepts 4 or 5 function pointer arguments:
- *   - 4 args: send, receive, isRxAvailable, isTxReady          (flush = NULL)
- *   - 5 args: send, receive, isRxAvailable, isTxReady, flush
- *
- * Must be followed by X2Cscope_Initialise(). For new code prefer
- * X2Cscope_InitialiseEx() with X2CSCOPE_CONFIG_INIT().
- */
-#define X2Cscope_HookUARTFunctions(...) \
-    _X2CS_HOOK_DISPATCH(_X2CS_HOOK_NARGS(__VA_ARGS__), __VA_ARGS__)
 
 /* Functions below must be implemented by the X2Cscope user.
  * Typically in X2CscopeComm.c */
@@ -170,21 +128,12 @@ void flushSerial(void);
 /**
  * @brief Single-call initialisation using a unified configuration struct.
  *
- * Preferred API for new projects. Validates required fields (in debug builds),
- * hooks the communication interface, and initialises the scope — all in one call.
+ * Validates required fields (in debug builds), hooks the communication
+ * interface, and initialises the scope buffer — all in one call.
  * Follow with X2CscopeComm_PostInit() for any peripheral-level post-init steps.
- * Implemented in the X2Cscope library (X2CScopeWrapper.c).
+ * Implemented in the X2Cscope library.
  */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
-
-/**
- * @brief Legacy: initialise X2Cscope buffer and LNet protocol.
- * @note Maintained for backward compatibility. New code should use X2Cscope_InitialiseEx().
- *       Must be preceded by X2Cscope_HookUARTFunctions().
- *       Implemented in the X2Cscope library (X2CScopeWrapper.c).
- */
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize,
-    uint16_t appVersion, compilationDate_t compilationDate);
 
 /**
  * @brief User-level post-initialization function.

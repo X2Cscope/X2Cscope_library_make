@@ -35,7 +35,7 @@ typedef struct {
     void*    scopeArray;                        /**< Required: Scope data buffer pointer  */
     uint16_t scopeSize;                         /**< Required: Scope buffer size in bytes */
     uint16_t         appVersion;                /**< Application version identifier       */
-    compilationDate_t compilationDate;          /**< Build timestamp (__DATE__, __TIME__) */
+    const compilationDate_t *compilationDate;   /**< Pointer to build timestamp � must have static storage duration */
 } X2Cscope_Config_t;
 
 /**
@@ -53,29 +53,8 @@ typedef struct {
     .scopeArray               = (buf_),                                  \
     .scopeSize                = (bufSize_),                              \
     .appVersion               = (ver_),                                  \
-    .compilationDate          = (compDate_)                              \
+    .compilationDate          = &(compDate_)                              \
 }
-
-/** Internal 5-parameter hook — do not call directly. */
-void X2Cscope_HookUARTFunctions_v5(
-    void    (*sendSerialFcnPntr)(uint8_t),
-    uint8_t (*receiveSerialFcnPntr)(void),
-    uint8_t (*isReceiveDataAvailableFcnPntr)(void),
-    uint8_t (*isSendReadyFcnPntr)(void),
-    void    (*flushSerialFcnPntr)(void));
-
-/** @cond INTERNAL */
-#define _X2CS_HOOK_GET6(_1,_2,_3,_4,_5,_6,...) _6
-#define _X2CS_HOOK_NARGS(...) _X2CS_HOOK_GET6(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
-#define _X2CS_HOOK4(s,r,a,t)       X2Cscope_HookUARTFunctions_v5(s, r, a, t, NULL)
-#define _X2CS_HOOK5(s,r,a,t,f)     X2Cscope_HookUARTFunctions_v5(s, r, a, t, f)
-#define _X2CS_HOOK_PICK(n,...)     _X2CS_HOOK##n(__VA_ARGS__)
-#define _X2CS_HOOK_DISPATCH(n,...) _X2CS_HOOK_PICK(n, __VA_ARGS__)
-/** @endcond */
-
-/** Legacy hook macro — 4 or 5 args, backward compatible. */
-#define X2Cscope_HookUARTFunctions(...) \
-    _X2CS_HOOK_DISPATCH(_X2CS_HOOK_NARGS(__VA_ARGS__), __VA_ARGS__)
 
 /* Callbacks implemented in X2CscopeComm.c */
 void    sendSerial(uint8_t data);
@@ -84,10 +63,8 @@ uint8_t isReceiveDataAvailable(void);
 uint8_t isSendReady(void);
 void    flushSerial(void);
 
-/* Library functions implemented in the X2Cscope .a */
+/* Library function implemented in the X2Cscope .a */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize,
-    uint16_t appVersion, compilationDate_t compilationDate);
 
 /** User-implemented comm-layer post-init, called from X2Cscope_Init(). */
 void X2CscopeComm_PostInit(void);

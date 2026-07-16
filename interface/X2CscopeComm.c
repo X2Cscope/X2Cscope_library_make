@@ -53,8 +53,9 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 
 /**
   @brief
-    Add any extra initialization required to the comm layer.
-    This function should be called by the user after X2Cscope_Initialise().
+    Comm-layer post-init. Called from X2Cscope_Init() after
+    X2Cscope_InitialiseEx(). Implement for any steps that must follow
+    library init (e.g. start TCP server, enable UART TX interrupt).
  */
 void X2CscopeComm_PostInit(void)
 {

@@ -70,9 +70,9 @@ extern "C" {
 #define X2CSCOPE_APP_VERSION 0x0001
 #endif
 
-typedef const struct compilationDate_type{
-    uint8_t date[11];
-    uint8_t time[8];
+typedef struct compilationDate_type {
+    char date[12];  /* __DATE__ is 11 chars + null terminator */
+    char time[9];   /* __TIME__ is  8 chars + null terminator */
 } compilationDate_t;
 
 /* External X2Cscope API functions that must be used in the applications  */

@@ -40,8 +40,8 @@
  */
 #include "VersionInfo.h"
 
-void initVersionInfo(volatile tTableStruct* tblStruct, const uint16 appVersion, compilationDate_t compilationDate)
+void initVersionInfo(volatile tTableStruct* tblStruct, uint16 appVersion, const compilationDate_t *compilationDate)
 {
 	tblStruct->framePrgVersion = appVersion;
-	tblStruct->framePrgCompDateTime = (uint8*)&compilationDate;
+	tblStruct->framePrgCompDateTime = (const uint8_t*)compilationDate;
 }
