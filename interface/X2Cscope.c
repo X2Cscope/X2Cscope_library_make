@@ -48,13 +48,9 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 
 
 /**
- * This file shows example for X2Cscope_Init implementation.
- *
- * Two initialization styles are shown:
- *  1. New (recommended): X2CSCOPE_CONFIG_INIT + X2Cscope_InitialiseEx — single call,
- *     compile-time-safe, all parameters in one place.
- *  2. Legacy (still supported): X2Cscope_HookUARTFunctions + X2Cscope_Initialise —
- *     kept for backward compatibility with existing projects.
+ * This file shows an example X2Cscope_Init implementation.
+ * Adapt the X2CscopeComm.c callbacks to your communication peripheral.
+ * See interface/examples/ for UART, CAN, and TCP/IP implementations.
  */
 #include "X2CscopeComm.h"
 #include "X2Cscope.h"
@@ -64,13 +60,14 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
  * Override by defining X2CSCOPE_BUFFER_SIZE before including X2Cscope.h. */
 int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE];
 
-/* Build date/time stamp — read out by the X2Cscope "Get Device Info" service. */
-compilationDate_t compilationDate = {__DATE__, __TIME__};
+/* Build date/time stamp — read out by the X2Cscope "Get Device Info" service.
+ * Must have static storage duration (global or static local) because
+ * X2Cscope_InitialiseEx stores a pointer to it internally. */
+const compilationDate_t compilationDate = {__DATE__, __TIME__};
 
 void X2Cscope_Init(void)
 {
-    /* --- NEW API (recommended for all new projects) ---
-     * X2CSCOPE_CONFIG_INIT requires all 9 parameters. Omitting or reordering
+    /* X2CSCOPE_CONFIG_INIT requires all 9 parameters. Omitting or reordering
      * any argument causes a compile-time error, catching the most common
      * integration mistakes before the code ever runs.
      * flushSerial is optional: pass NULL if your peripheral does not need it. */
@@ -87,17 +84,4 @@ void X2Cscope_Init(void)
     );
     X2Cscope_InitialiseEx(&config);
     X2CscopeComm_PostInit();
-
-    /* --- LEGACY API (backward compatible, still supported) ---
-     * Use this form if migrating an existing project that already calls
-     * X2Cscope_HookUARTFunctions / X2Cscope_Initialise.
-     * Both 4-argument and 5-argument forms of X2Cscope_HookUARTFunctions
-     * are accepted; the 4-argument form sets flushSerial to NULL.
-     *
-     * X2Cscope_HookUARTFunctions(sendSerial, receiveSerial,
-     *                             isReceiveDataAvailable, isSendReady);
-     * X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-     *                     X2CSCOPE_APP_VERSION, compilationDate);
-     * X2CscopeComm_PostInit();
-     */
 }

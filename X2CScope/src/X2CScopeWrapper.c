@@ -47,48 +47,12 @@ static uint8_t (*isReceiveDataAvailableFcn)(void);
 static uint8_t (*isSendReadyFcn)(void);
 static void    (*flushSerialFcn)(void);
 
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize, const uint16_t appVersion, compilationDate_t compilationDate) {
-     //X2C
-    initTableStruct();
-    initSerialGeneric(&interface);
-    initLNet(&protocol, bufferLNet, LNET_BUFFERSIZE, LNET_NODEID);
-    initServiceTable((tProtocol*)&protocol);
-    addCoreServices((tProtocol*)&protocol);
-    addBlockServices((tProtocol*)&protocol);
-    addExtendedBlockServices((tProtocol*)&protocol);
-    addTableStructProtocol((tProtocol*)&protocol);
-    linkSerial((tProtocol*)&protocol, &interface);
-    TableStruct->DSPState = PRG_LOADED_STATE;
-
-    initVersionInfo(TableStruct, appVersion, compilationDate);
-    TableStruct->TFncTable = blockFunctionTable;
-    TableStruct->TParamTable = parameterIdTable;
-
-    initSerial(&interface);
-
-    X2C_Init(scopeArray,scopeSize);
-}
-
 void X2Cscope_Communicate() {
      protocol.pCommunicate((tProtocol*)&protocol);
 }
 
 void X2Cscope_Update() {
     X2C_Update();
-}
-
-void X2Cscope_HookUARTFunctions_v5(
-    void    (*sendSerialFcnPntr)(uint8_t),
-    uint8_t (*receiveSerialFcnPntr)(void),
-    uint8_t (*isReceiveDataAvailableFcnPntr)(void),
-    uint8_t (*isSendReadyFcnPntr)(void),
-    void    (*flushSerialFcnPntr)(void))
-{
-    sendSerialFcn                = sendSerialFcnPntr;
-    receiveSerialFcn             = receiveSerialFcnPntr;
-    isReceiveDataAvailableFcn    = isReceiveDataAvailableFcnPntr;
-    isSendReadyFcn               = isSendReadyFcnPntr;
-    flushSerialFcn               = flushSerialFcnPntr;
 }
 
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config)
@@ -102,18 +66,34 @@ void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config)
     X2CS_ASSERT_NOT_NULL(config->isReceiveDataAvailable);
     X2CS_ASSERT_NOT_NULL(config->isSendReady);
     X2CS_ASSERT_NOT_NULL(config->scopeArray);
+    X2CS_ASSERT_NOT_NULL(config->compilationDate);
 
-    /* Hook communication functions (flushSerial may be NULL — that is valid) */
-    X2Cscope_HookUARTFunctions_v5(
-        config->sendSerial,
-        config->receiveSerial,
-        config->isReceiveDataAvailable,
-        config->isSendReady,
-        config->flushSerial);
+    /* Store communication function pointers */
+    sendSerialFcn             = config->sendSerial;
+    receiveSerialFcn          = config->receiveSerial;
+    isReceiveDataAvailableFcn = config->isReceiveDataAvailable;
+    isSendReadyFcn            = config->isSendReady;
+    flushSerialFcn            = config->flushSerial;  /* may be NULL — valid */
 
-    /* Initialise scope buffer and LNet protocol */
-    X2Cscope_Initialise(config->scopeArray, config->scopeSize,
-                        config->appVersion, config->compilationDate);
+    /* Initialise scope, LNet protocol, and version info */
+    initTableStruct();
+    initSerialGeneric(&interface);
+    initLNet(&protocol, bufferLNet, LNET_BUFFERSIZE, LNET_NODEID);
+    initServiceTable((tProtocol*)&protocol);
+    addCoreServices((tProtocol*)&protocol);
+    addBlockServices((tProtocol*)&protocol);
+    addExtendedBlockServices((tProtocol*)&protocol);
+    addTableStructProtocol((tProtocol*)&protocol);
+    linkSerial((tProtocol*)&protocol, &interface);
+    TableStruct->DSPState = PRG_LOADED_STATE;
+
+    initVersionInfo(TableStruct, config->appVersion, config->compilationDate);
+    TableStruct->TFncTable  = blockFunctionTable;
+    TableStruct->TParamTable = parameterIdTable;
+
+    initSerial(&interface);
+
+    X2C_Init(config->scopeArray, config->scopeSize);
 }
 
 void sendSerialWrapper(tSerial* serial, uint8 data) {

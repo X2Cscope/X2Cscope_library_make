@@ -1,192 +1,179 @@
-# X2Cscope API Migration Guide
+# X2Cscope Migration Guide
 
 ## Overview
 
-This guide explains the X2Cscope initialization API and how to migrate existing code.
+This guide covers what changed in the X2Cscope initialization API, what you
+need to update in existing code, and how to use the current API.
 
-## What Changed?
+---
 
-### New Features
-- **Unified Configuration Structure**: `X2Cscope_Config_t` combines communication interface and initialization parameters into a single object
-- **Single-Call Init**: `X2Cscope_InitialiseEx()` replaces the previous two-step hook + init flow
-- **Compile-Time Safety**: `X2CSCOPE_CONFIG_INIT()` macro ensures all required fields are provided
-- **Optional Flush**: `flushSerial()` callback (can be NULL)
-- **Post-Init Hook**: `X2CscopeComm_PostInit()` for protocol-specific setup
+## Breaking Changes
 
-### Backward Compatibility
-- **Legacy two-step API still works**: `X2Cscope_HookUARTFunctions()` + `X2Cscope_Initialise()`
-- **Zero breaking changes** for existing code
+### 1. Legacy init functions removed
 
-## New API (Recommended)
+`X2Cscope_HookUARTFunctions()` and `X2Cscope_Initialise()` no longer exist.
+Replace them with a single call to `X2Cscope_InitialiseEx()` as shown below.
 
-### Using X2Cscope_Config_t with X2CSCOPE_CONFIG_INIT
+### 2. `compilationDate_t` typedef no longer carries `const`
+
+The old typedef was:
+```c
+typedef const struct compilationDate_type { ... } compilationDate_t;
+```
+
+It is now:
+```c
+typedef struct compilationDate_type { ... } compilationDate_t;
+```
+
+Declare your variable with `const` explicitly:
+```c
+const compilationDate_t compilationDate = {__DATE__, __TIME__};
+```
+
+### 3. `compilationDate_t` is passed by pointer, not by value
+
+`X2Cscope_Config_t` holds a `const compilationDate_t *`. The variable must
+have **static storage duration** (file-scope global or `static` local) because
+the library stores the pointer internally. Passing a stack-allocated variable
+would result in a dangling pointer.
+
+### 4. `compilationDate_t` fields changed from `uint8_t` to `char`
+
+The old struct used `uint8_t[11]` / `uint8_t[8]`. These are now `char[12]` /
+`char[9]` to match the type and null-terminated length of `__DATE__` and
+`__TIME__`.
+
+---
+
+## Current API
+
+### Initialization
+
+Declare the scope buffer and the build timestamp at file scope, then fill a
+config struct and call `X2Cscope_InitialiseEx()`:
 
 ```c
+/* Scope data buffer — size controlled by X2CSCOPE_BUFFER_SIZE (default 5000). */
+int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE];
+
+/* Build timestamp — must be global or static; the library stores a pointer to it. */
+const compilationDate_t compilationDate = {__DATE__, __TIME__};
+
 void X2Cscope_Init(void)
 {
     X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-        sendSerial,                  // sendSerial
-        receiveSerial,               // receiveSerial
-        isReceiveDataAvailable,      // isReceiveDataAvailable
-        isSendReady,                 // isSendReady
-        flushSerial,                 // flushSerial (NULL if not needed)
-        (void*)X2CscopeArray,        // scopeArray
-        X2CSCOPE_BUFFER_SIZE,        // scopeSize
-        X2CSCOPE_APP_VERSION,        // appVersion
-        compilationDate              // compilationDate
+        sendSerial,                 /* send one byte          (required) */
+        receiveSerial,              /* receive one byte       (required) */
+        isReceiveDataAvailable,     /* RX data ready flag     (required) */
+        isSendReady,                /* TX buffer not full     (required) */
+        flushSerial,                /* flush TX buffer        (NULL if unused) */
+        (void*)X2CscopeArray,       /* scope data buffer      (required) */
+        X2CSCOPE_BUFFER_SIZE,       /* scope buffer size      (required) */
+        X2CSCOPE_APP_VERSION,       /* app version identifier (required) */
+        compilationDate             /* build timestamp        (required) */
     );
     X2Cscope_InitialiseEx(&config);
     X2CscopeComm_PostInit();
 }
 ```
 
-### Benefits
-- **Single call**: No more separate hook + init steps
-- **Compile-time safety**: Missing a macro argument causes a compiler error
-- **Future-proof**: New fields can be added without breaking existing code
-- **Self-documenting**: All configuration visible in one place
-- **Zero overhead**: Macro expands to a plain struct initializer
+Pass `NULL` for `flushSerial` if your peripheral does not need an explicit
+flush step (e.g. a direct byte-at-a-time UART).
 
-## Legacy API (Still Supported)
-
-### Two-Step Interface
+### Runtime calls
 
 ```c
-void X2Cscope_Init(void)
-{
-    X2Cscope_HookUARTFunctions(sendSerial, receiveSerial,
-                               isReceiveDataAvailable, isSendReady);
+/* Call from main/idle loop: */
+X2Cscope_Communicate();
 
-    X2Cscope_Initialise((void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-                        X2CSCOPE_APP_VERSION, compilationDate);
-}
+/* Call at a fixed rate (timer ISR or fixed-rate task): */
+X2Cscope_Update();
 ```
 
-**Note**: legacy `X2Cscope_HookUARTFunctions()` does not support `flushSerial` (sets it to NULL).
+---
 
 ## API Reference
 
-### X2Cscope_Config_t Structure
+### `compilationDate_t`
+
+```c
+typedef struct compilationDate_type {
+    char date[12];  /* __DATE__: "Mon DD YYYY" + null terminator */
+    char time[9];   /* __TIME__: "HH:MM:SS"   + null terminator */
+} compilationDate_t;
+```
+
+### `X2Cscope_Config_t`
 
 ```c
 typedef struct {
-    /* Communication interface */
-    void (*sendSerial)(uint8_t);              // Required: Send byte
-    uint8_t (*receiveSerial)(void);           // Required: Receive byte
-    uint8_t (*isReceiveDataAvailable)(void);  // Required: Check RX data available
-    uint8_t (*isSendReady)(void);             // Required: Check TX ready
-    void (*flushSerial)(void);                // Optional: Flush TX buffer (NULL if not used)
-    /* Scope buffer */
-    void* scopeArray;                         // Required: Pointer to scope data buffer
-    uint16_t scopeSize;                       // Required: Size of scope buffer in bytes
-    /* Application info */
-    uint16_t appVersion;                      // Application version identifier
-    compilationDate_t compilationDate;        // Build date/time stamp
+    void    (*sendSerial)(uint8_t);           /* Required */
+    uint8_t (*receiveSerial)(void);           /* Required */
+    uint8_t (*isReceiveDataAvailable)(void);  /* Required */
+    uint8_t (*isSendReady)(void);             /* Required */
+    void    (*flushSerial)(void);             /* Optional — NULL if unused */
+    void*    scopeArray;                      /* Required */
+    uint16_t scopeSize;                       /* Required */
+    uint16_t appVersion;                      /* Required */
+    const compilationDate_t *compilationDate; /* Required — must have static storage duration */
 } X2Cscope_Config_t;
 ```
 
-### X2CSCOPE_CONFIG_INIT Macro
+### `X2CSCOPE_CONFIG_INIT` macro
+
+Positional initializer macro for `X2Cscope_Config_t`. All 9 arguments are
+required. Omitting or reordering any argument causes a compiler error.
 
 ```c
 X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-    send, recv, avail, ready, flush, buf, bufSize, ver, compDate
+    send, recv, rxAvail, txReady, flush, buf, bufSize, ver, compDate
 );
 ```
 
-All 9 arguments are required. Omitting any argument causes a **compiler error**.
-The macro expands to a designated initializer list with zero runtime overhead.
+### `X2Cscope_InitialiseEx`
 
-### Functions
-
-#### X2Cscope_InitialiseEx (Recommended)
 ```c
-void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
+void X2Cscope_InitialiseEx(const X2Cscope_Config_t *config);
 ```
-- Single-call initialization: hooks communication and initializes scope
-- Use with `X2CSCOPE_CONFIG_INIT()` for compile-time safety
 
-#### X2Cscope_HookUARTFunctions (Legacy)
-```c
-void X2Cscope_HookUARTFunctions(
-    void (*sendSerialFcnPntr)(uint8_t),
-    uint8_t (*receiveSerialFcnPntr)(),
-    uint8_t (*isReceiveDataAvailableFcnPntr)(),
-    uint8_t (*isSendReadyFcnPntr)());
-```
-- Maintained for backward compatibility
-- Sets `flushSerial` to NULL
-- Must be followed by `X2Cscope_Initialise()`
+Validates required fields (debug builds), hooks the communication interface,
+and initializes the scope buffer. Call once from `X2Cscope_Init()`.
 
-#### X2Cscope_Initialise (Legacy)
-```c
-void X2Cscope_Initialise(void* scopeArray, uint16_t scopeSize,
-    uint16_t appVersion, compilationDate_t compilationDate);
-```
-- Maintained for backward compatibility
-- Must be preceded by `X2Cscope_HookUARTFunctions()`
+### `X2CscopeComm_PostInit`
 
-#### X2CscopeComm_PostInit
 ```c
 void X2CscopeComm_PostInit(void);
 ```
-- User-implemented, called from `X2Cscope_Init()` after `X2Cscope_InitialiseEx()`
-- Implement in `X2CscopeComm.c`
-- Use for starting a TCP server, enabling UART TX interrupts, DMA setup, etc.
-- Leave empty if no post-init steps are needed
 
-#### X2Cscope_Communicate
+User-implemented, called from `X2Cscope_Init()` after `X2Cscope_InitialiseEx()`.
+Implement in `X2CscopeComm.c` for any steps that must follow library init
+(enabling UART TX interrupts, starting a TCP server, starting DMA, etc.).
+Leave the body empty if no post-init steps are needed.
+
+### `X2Cscope_Communicate`
+
 ```c
 void X2Cscope_Communicate(void);
 ```
-- Call in idle/main loop
 
-#### X2Cscope_Update
+Processes the LNet protocol. Call from the main/idle loop.
+
+### `X2Cscope_Update`
+
 ```c
 void X2Cscope_Update(void);
 ```
-- Call with fixed period (e.g., in timer ISR or fixed-rate task)
 
-## Migration Recommendations
+Advances the scope sampler. Call at a fixed rate from a timer ISR or
+fixed-rate task.
 
-### For New Projects
-Use `X2Cscope_InitialiseEx()` with `X2CSCOPE_CONFIG_INIT()`.
-
-### For Existing Projects
-No action required - legacy API continues to work unchanged.
-Optional: migrate to new API for single-call init and `flushSerial` support.
-
-## Common Patterns
-
-### No Flush Required
-```c
-X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-    sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady,
-    NULL,                            // No flush
-    (void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-    X2CSCOPE_APP_VERSION, compilationDate
-);
-```
-
-### With Flush
-```c
-X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-    sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady,
-    flushSerial,                     // Flush enabled
-    (void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-    X2CSCOPE_APP_VERSION, compilationDate
-);
-```
-
-## Support
-
-For questions or issues:
-- Review example in `interface/X2Cscope.c`
-- Examine template in `interface/X2CscopeComm.c`
+---
 
 ## Communication Layer Examples
 
-Complete, ready-to-use `X2CscopeComm.h` and `X2CscopeComm.c` implementations
-are provided under `interface/examples/` for three transport interfaces:
+Ready-to-use `X2CscopeComm.h` and `X2CscopeComm.c` implementations are
+provided under `interface/examples/` for three transport interfaces:
 
 | Folder | Interface |
 |---|---|

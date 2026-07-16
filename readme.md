@@ -53,9 +53,12 @@ Then just execute the make command in the folder and makefile will call automati
 ### 5. API migration
 
 If updating from a previous version of the X2Cscope interface files, see
-`MIGRATION_GUIDE.md` for a full description of the new `X2Cscope_InitialiseEx()`
-/ `X2CSCOPE_CONFIG_INIT()` API, the backward-compatible legacy API, and
-migration recommendations.
+`MIGRATION_GUIDE.md` for the full description of the `X2Cscope_InitialiseEx()`
+/ `X2CSCOPE_CONFIG_INIT()` API and the required migration steps.
+
+**Note**: The legacy `X2Cscope_HookUARTFunctions()` + `X2Cscope_Initialise()`
+two-step API has been removed. Existing code using those functions must migrate
+to `X2Cscope_InitialiseEx()`.
 
 ### 6. Integration examples
 
