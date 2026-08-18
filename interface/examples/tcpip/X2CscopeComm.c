@@ -28,7 +28,6 @@
  *   7. Call X2Cscope_Update() from a fixed-rate task or timer ISR.
  */
 
-#include <xc.h>
 #include <stdint.h>
 #include "X2CscopeComm.h"
 
@@ -129,18 +128,20 @@ uint8_t receiveSerial(void)
 
 /**
  * @brief Check whether at least one received byte is waiting.
+ * @return true if RX data available, false otherwise.
  */
-uint8_t isReceiveDataAvailable(void)
+bool isReceiveDataAvailable(void)
 {
-    return (uint8_t)(rx_buf.head != rx_buf.tail);
+    return (rx_buf.head != rx_buf.tail);
 }
 
 /**
  * @brief TCP is always ready from the firmware side — TX is buffered.
+ * @return true always.
  */
-uint8_t isSendReady(void)
+bool isSendReady(void)
 {
-    return 1u;
+    return true;
 }
 
 /**

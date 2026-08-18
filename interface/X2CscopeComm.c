@@ -48,7 +48,6 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 /**
  * This file implements the X2C Lin protocol connection with MCC Peripheral drivers.
  */
-#include <xc.h>
 #include "X2CscopeComm.h"
 
 /**
@@ -108,7 +107,7 @@ uint8_t receiveSerial()
     True -> Serial data ready to read.
     False -> No data.
  */
-uint8_t isReceiveDataAvailable()
+bool isReceiveDataAvailable()
 {
 #error "Implement your receive byte available function, then delete this line."
 /*Example:
@@ -123,7 +122,7 @@ uint8_t isReceiveDataAvailable()
     True -> Transmit buffer is not full, at least one more character can be written.
     False -> Transmit buffer is full.
  */
-uint8_t isSendReady()
+bool isSendReady()
 {
 #error "Implement your send byte possible function, then delete this line."
 /*Example:

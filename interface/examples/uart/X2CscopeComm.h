@@ -16,8 +16,8 @@
 extern "C" {
 #endif
 
-#include <xc.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "X2Cscope.h"  /* compilationDate_t, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION */
 
 /**
@@ -29,8 +29,8 @@ extern "C" {
 typedef struct {
     void    (*sendSerial)(uint8_t);             /**< Required: Send one byte              */
     uint8_t (*receiveSerial)(void);             /**< Required: Receive one byte           */
-    uint8_t (*isReceiveDataAvailable)(void);    /**< Required: Non-zero when RX data ready */
-    uint8_t (*isSendReady)(void);               /**< Required: Non-zero when TX not full  */
+    bool    (*isReceiveDataAvailable)(void);    /**< Required: Returns true when RX data is waiting */
+    bool    (*isSendReady)(void);               /**< Required: Returns true when TX buffer has space */
     void    (*flushSerial)(void);               /**< Optional: Flush TX buffer (or NULL)  */
     void*    scopeArray;                        /**< Required: Scope data buffer pointer  */
     uint16_t scopeSize;                         /**< Required: Scope buffer size in bytes */
@@ -57,11 +57,11 @@ typedef struct {
 }
 
 /* Callbacks implemented in X2CscopeComm.c */
-void    sendSerial(uint8_t data);
+void sendSerial(uint8_t data);
 uint8_t receiveSerial(void);
-uint8_t isReceiveDataAvailable(void);
-uint8_t isSendReady(void);
-void    flushSerial(void);
+bool isReceiveDataAvailable(void);
+bool isSendReady(void);
+/* flushSerial is not needed for UART — NULL is passed to X2Cscope_InitialiseEx() */
 
 /* Library function implemented in the X2Cscope .a */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);

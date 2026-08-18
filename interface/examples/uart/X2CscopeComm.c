@@ -19,7 +19,6 @@
  *   6. Call X2Cscope_Update() from a fixed-rate task or timer ISR.
  */
 
-#include <xc.h>
 #include "X2CscopeComm.h"
 
 /* --------------------------------------------------------------------------
@@ -27,7 +26,7 @@
  * The MCC Melody UART driver exposes a uart_drv_interface_t struct instance
  * with function pointers Read, Write, IsRxReady, IsTxReady.
  * -------------------------------------------------------------------------- */
-#include "uart/uart1.h"                     /* adjust path to your driver   */
+#include "../uart/uart1.h"                  /* adjust path to your driver   */
 #define X2CScopeUart  uart1_drv_interface   /* adjust to your instance name */
 /* -------------------------------------------------------------------------- */
 
@@ -50,33 +49,25 @@ uint8_t receiveSerial(void)
 
 /**
  * @brief Check whether at least one received byte is waiting.
- * @return Non-zero if RX data available, zero otherwise.
+ * @return true if RX data available, false otherwise.
  */
-uint8_t isReceiveDataAvailable(void)
+bool isReceiveDataAvailable(void)
 {
-    return (uint8_t)X2CScopeUart.IsRxReady();
+    return X2CScopeUart.IsRxReady();
 }
 
 /**
  * @brief Check whether the TX buffer can accept at least one more byte.
- * @return Non-zero if transmit is possible, zero if TX buffer is full.
+ * @return true if transmit is possible, false if TX buffer is full.
  */
-uint8_t isSendReady(void)
+bool isSendReady(void)
 {
-    return (uint8_t)X2CScopeUart.IsTxReady();
+    return X2CScopeUart.IsTxReady();
 }
 
-/**
- * @brief Flush the transmit buffer.
- * For a direct byte-at-a-time UART the hardware sends each byte immediately
- * as it is written — no explicit flush is needed. Leave this function empty
- * unless your implementation uses a software TX FIFO requiring an explicit
- * commit step.
- */
-void flushSerial(void)
-{
-    /* Nothing to do — UART transmits each byte immediately. */
-}
+/* flushSerial is not implemented for UART — NULL is passed to
+ * X2Cscope_InitialiseEx() so the library skips the flush call entirely,
+ * saving the function call overhead on every LNet frame. */
 
 /**
  * @brief Comm-layer post-init, called from X2Cscope_Init() after

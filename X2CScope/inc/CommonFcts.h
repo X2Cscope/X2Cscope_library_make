@@ -39,7 +39,14 @@
 #ifndef COMMONFCTS_H
 #define COMMONFCTS_H
 
+#include <stdbool.h>
 #include "Target.h"
+
+/* Forward declaration — full definition is in interface/X2Cscope.h.
+ * A pointer to this type is sufficient for tTableStruct; files that
+ * dereference the pointer (Services.c, VersionInfo.c) include X2Cscope.h
+ * themselves via VersionInfo.h. */
+typedef struct compilationDate_type compilationDate_t;
 
 #define LOW(data)  ((data) & 0xFF)
 #define HIGH(data) (((uint16)(data)) >> 8)
@@ -154,12 +161,12 @@ typedef enum {
 /* 'base class' interface */
 typedef struct tInterface tInterface;
 struct tInterface {
-	void (*send)(tInterface* hwInterface, uint8 data);
+	void  (*send)(tInterface* hwInterface, uint8 data);
 	uint8 (*receive)(tInterface* hwInterface);
-	uint8 (*isReceiveDataAvailable)(tInterface* hwInterface);
-	uint8 (*isSendReady)(tInterface* hwInterface);
+	bool  (*isReceiveDataAvailable)(tInterface* hwInterface);
+	bool  (*isSendReady)(tInterface* hwInterface);
 	uint8 (*getTxFifoFree)(tInterface* hwInterface);
-	void (*flush)(tInterface* hwInterface);
+	void  (*flush)(tInterface* hwInterface);
 };
 
 /* 'base class' protocol */
@@ -263,7 +270,7 @@ struct tTableStruct {
     tProtocol* protocols[MAX_PROTOCOLS];
     
     uint16 framePrgVersion;
-    const uint8_t* framePrgCompDateTime;
+    const compilationDate_t* framePrgCompDateTime;
 
 	SCOPE_MAIN* piScope;
 

@@ -44,6 +44,20 @@ The old struct used `uint8_t[11]` / `uint8_t[8]`. These are now `char[12]` /
 `char[9]` to match the type and null-terminated length of `__DATE__` and
 `__TIME__`.
 
+### 5. `isReceiveDataAvailable` and `isSendReady` callbacks return `bool`
+
+The return type of these two callbacks changed from `uint8_t` to `bool`.
+
+```c
+/* Before */
+uint8_t isReceiveDataAvailable(void) { return UART1_IsRxReady(); }
+uint8_t isSendReady(void)            { return UART1_IsTxReady(); }
+
+/* After */
+bool isReceiveDataAvailable(void) { return UART1_IsRxReady(); }
+bool isSendReady(void)            { return UART1_IsTxReady(); }
+```
+
 ---
 
 ## Current API
@@ -110,8 +124,8 @@ typedef struct compilationDate_type {
 typedef struct {
     void    (*sendSerial)(uint8_t);           /* Required */
     uint8_t (*receiveSerial)(void);           /* Required */
-    uint8_t (*isReceiveDataAvailable)(void);  /* Required */
-    uint8_t (*isSendReady)(void);             /* Required */
+    bool    (*isReceiveDataAvailable)(void);  /* Required */
+    bool    (*isSendReady)(void);             /* Required */
     void    (*flushSerial)(void);             /* Optional — NULL if unused */
     void*    scopeArray;                      /* Required */
     uint16_t scopeSize;                       /* Required */

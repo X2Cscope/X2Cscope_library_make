@@ -43,12 +43,12 @@
 #include "CommonFcts.h"
 
 typedef struct {
-	void (*send)(tInterface*, uint8);
+	void  (*send)(tInterface*, uint8);
 	uint8 (*receive)(tInterface*);
-	uint8 (*isReceiveDataAvailable)(tInterface*);
-	uint8 (*isSendReady)(tInterface*);
+	bool  (*isReceiveDataAvailable)(tInterface*);
+	bool  (*isSendReady)(tInterface*);
 	uint8 (*getTxFifoFree)(tInterface*);
-	void (*flush)(tInterface*);
+	void  (*flush)(tInterface*);
 } tSerial;
 
 /* public prototypes */
