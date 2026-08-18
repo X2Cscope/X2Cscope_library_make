@@ -56,8 +56,9 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 extern "C" {
 #endif
 
-#include <xc.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "X2Cscope.h"  /* compilationDate_t, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION */
 
 /**
@@ -73,8 +74,8 @@ typedef struct {
     /* Communication interface — all required except flushSerial */
     void    (*sendSerial)(uint8_t);             /**< Required: Send one byte over serial */
     uint8_t (*receiveSerial)(void);             /**< Required: Receive one byte from serial */
-    uint8_t (*isReceiveDataAvailable)(void);    /**< Required: Returns non-zero when RX data is waiting */
-    uint8_t (*isSendReady)(void);               /**< Required: Returns non-zero when TX buffer has space */
+    bool    (*isReceiveDataAvailable)(void);    /**< Required: Returns true when RX data is waiting */
+    bool    (*isSendReady)(void);               /**< Required: Returns true when TX buffer has space */
     void    (*flushSerial)(void);               /**< Optional: Flush/commit TX buffer (set NULL if unused) */
     /* Scope buffer */
     void*    scopeArray;                        /**< Required: Pointer to scope data buffer allocated by the application */
@@ -119,11 +120,11 @@ typedef struct {
 
 /* Functions below must be implemented by the X2Cscope user.
  * Typically in X2CscopeComm.c */
-void sendSerial(uint8_t data);
+void    sendSerial(uint8_t data);
 uint8_t receiveSerial(void);
-uint8_t isReceiveDataAvailable(void);
-uint8_t isSendReady(void);
-void flushSerial(void);
+bool    isReceiveDataAvailable(void);
+bool    isSendReady(void);
+void    flushSerial(void);
 
 /**
  * @brief Single-call initialisation using a unified configuration struct.

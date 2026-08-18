@@ -28,9 +28,7 @@
  *   7. Call X2Cscope_Update() from a fixed-rate task or timer ISR.
  */
 
-#include <xc.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include "X2CscopeComm.h"
 
 /* --------------------------------------------------------------------------
@@ -146,19 +144,21 @@ uint8_t receiveSerial(void)
 
 /**
  * @brief Check whether at least one byte is waiting in the RX ring buffer.
+ * @return true if RX data available, false otherwise.
  */
-uint8_t isReceiveDataAvailable(void)
+bool isReceiveDataAvailable(void)
 {
-    return (uint8_t)(!ringbuf_empty());
+    return !ringbuf_empty();
 }
 
 /**
  * @brief Check whether the CAN TX queue can accept a new frame.
+ * @return true if TX is possible, false if TX queue is full.
  */
-uint8_t isSendReady(void)
+bool isSendReady(void)
 {
-    return (uint8_t)(CAN_TX_FIFO_AVAILABLE ==
-                    (CAN1_TransmitFIFOStatusGet(CAN1_TXQ) & CAN_TX_FIFO_AVAILABLE));
+    return (CAN_TX_FIFO_AVAILABLE ==
+            (CAN1_TransmitFIFOStatusGet(CAN1_TXQ) & CAN_TX_FIFO_AVAILABLE));
 }
 
 /**

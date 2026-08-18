@@ -39,6 +39,7 @@
 #ifndef COMMONFCTS_H
 #define COMMONFCTS_H
 
+#include <stdbool.h>
 #include "Target.h"
 
 /* Forward declaration — full definition is in interface/X2Cscope.h.
@@ -160,12 +161,12 @@ typedef enum {
 /* 'base class' interface */
 typedef struct tInterface tInterface;
 struct tInterface {
-	void (*send)(tInterface* hwInterface, uint8 data);
+	void  (*send)(tInterface* hwInterface, uint8 data);
 	uint8 (*receive)(tInterface* hwInterface);
-	uint8 (*isReceiveDataAvailable)(tInterface* hwInterface);
-	uint8 (*isSendReady)(tInterface* hwInterface);
+	bool  (*isReceiveDataAvailable)(tInterface* hwInterface);
+	bool  (*isSendReady)(tInterface* hwInterface);
 	uint8 (*getTxFifoFree)(tInterface* hwInterface);
-	void (*flush)(tInterface* hwInterface);
+	void  (*flush)(tInterface* hwInterface);
 };
 
 /* 'base class' protocol */

@@ -29,6 +29,7 @@
  */
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "X2CscopeWrapper.h"
 
 /* Debug-build NULL-pointer assertion.
@@ -43,8 +44,8 @@
 // Static function pointers for UART/Serial interface
 static void    (*sendSerialFcn)(uint8_t);
 static uint8_t (*receiveSerialFcn)(void);
-static uint8_t (*isReceiveDataAvailableFcn)(void);
-static uint8_t (*isSendReadyFcn)(void);
+static bool    (*isReceiveDataAvailableFcn)(void);
+static bool    (*isSendReadyFcn)(void);
 static void    (*flushSerialFcn)(void);
 
 void X2Cscope_Communicate() {
@@ -104,12 +105,12 @@ uint8_t receiveSerialWrapper(tSerial* serial) {
     return (uint8) receiveSerialFcn();
 }
 
-uint8_t isReceiveDataAvailableWrapper(tSerial* serial) {
-    return (uint8) isReceiveDataAvailableFcn();
+bool isReceiveDataAvailableWrapper(tSerial* serial) {
+    return isReceiveDataAvailableFcn();
 }
 
-uint8_t isSendReadyWrapper(tSerial* serial) {
-    return (uint8) isSendReadyFcn();
+bool isSendReadyWrapper(tSerial* serial) {
+    return isSendReadyFcn();
 }
 
 void flushSerialWrapper(tSerial* serial) {
@@ -122,7 +123,7 @@ void initSerial(tSerial* serial)
 {
     serial->send = (void (*)(tInterface*, uint8))sendSerialWrapper;
     serial->receive = (uint8 (*)(tInterface*))receiveSerialWrapper;
-    serial->isReceiveDataAvailable = (uint8 (*)(tInterface*))isReceiveDataAvailableWrapper;
-    serial->isSendReady = (uint8 (*)(tInterface*))isSendReadyWrapper;
+    serial->isReceiveDataAvailable = (bool (*)(tInterface*))isReceiveDataAvailableWrapper;
+    serial->isSendReady = (bool (*)(tInterface*))isSendReadyWrapper;
     serial->flush = (void (*)(tInterface*))flushSerialWrapper;
 }

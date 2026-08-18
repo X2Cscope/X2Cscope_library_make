@@ -42,20 +42,20 @@
 
 
 /* private prototypes */
-static void sendSerial(tSerial* serialP, uint8 data);
+static void  sendSerial(tSerial* serialP, uint8 data);
 static uint8 receiveSerial(tSerial* serialP);
-static uint8 isReceiveDataAvailable(tSerial* serialP);
-static uint8 isSendReady(tSerial* serialP);
+static bool  isReceiveDataAvailable(tSerial* serialP);
+static bool  isSendReady(tSerial* serialP);
 static uint8 getTxFifoFree(tSerial* serialP);
-static void flush(tSerial* serialP);
+static void  flush(tSerial* serialP);
 
 
 void initSerialGeneric(tSerial* serialP)
 {
     serialP->send = (void (*)(tInterface*, uint8))sendSerial;
     serialP->receive = (uint8 (*)(tInterface*))receiveSerial;
-    serialP->isReceiveDataAvailable = (uint8 (*)(tInterface*))isReceiveDataAvailable;
-    serialP->isSendReady = (uint8 (*)(tInterface*))isSendReady;
+    serialP->isReceiveDataAvailable = (bool (*)(tInterface*))isReceiveDataAvailable;
+    serialP->isSendReady = (bool (*)(tInterface*))isSendReady;
     serialP->getTxFifoFree = (uint8 (*)(tInterface*))getTxFifoFree;
     serialP->flush = (void (*)(tInterface*))flush;
 }
@@ -75,14 +75,14 @@ static uint8 receiveSerial(tSerial* serialP)
     return ((uint8)0);
 }
 
-static uint8 isReceiveDataAvailable(tSerial* serialP)
+static bool isReceiveDataAvailable(tSerial* serialP)
 {
-    return ((uint8)0);
+    return false;
 }
 
-static uint8 isSendReady(tSerial* serialP)
+static bool isSendReady(tSerial* serialP)
 {
-    return ((uint8)0);
+    return false;
 }
 
 static uint8 getTxFifoFree(tSerial* serialP)

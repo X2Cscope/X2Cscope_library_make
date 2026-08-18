@@ -39,7 +39,7 @@
 #include "Target.h"
 #include "X2C.h"
 #include "VersionInfo.h"
-#include "X2CscopeComm.h"  /* For X2Cscope_Config_t definition */
+#include "../../interface/X2CscopeComm.h"  /* X2Cscope_Config_t, X2CSCOPE_CONFIG_INIT */
 
 /* generated X2C parameter identifier & block function table */
 extern const tBlockFunctions blockFunctionTable[];
