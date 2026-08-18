@@ -39,6 +39,7 @@
  * All rights reserved.
  */
 #include "Services.h"
+#include "../../interface/X2Cscope.h"  /* compilationDate_t — full definition needed to dereference framePrgCompDateTime */
 
 /* monitor program version */
 #define DEVINFO_MONITOR_VERSION ((uint16)0x0005)
@@ -327,25 +328,31 @@ static void getDeviceInfo(tProtocol* protocol)
 	else
 	{
 		/* frame program compilation date as ASCII string */
-		/* 22 ... 24 -> first 3 letters of month (e.g. Oct, Dec) */
-		/* 25 ... 26 -> day as DD */
-		/* 27 ... 30 -> year as YYYY */
-		/* frame program compilation time as ASCII string */
-		/* 31 ... 32 -> hour as HH */
-		/* 23 ... 24 -> minute as MM */
-		protocol->ucFRAMEData[22] = TableStruct->framePrgCompDateTime[0];
-		protocol->ucFRAMEData[23] = TableStruct->framePrgCompDateTime[1];
-		protocol->ucFRAMEData[24] = TableStruct->framePrgCompDateTime[2];
-		protocol->ucFRAMEData[25] = TableStruct->framePrgCompDateTime[4];
-		protocol->ucFRAMEData[26] = TableStruct->framePrgCompDateTime[5];
-		protocol->ucFRAMEData[27] = TableStruct->framePrgCompDateTime[7];
-		protocol->ucFRAMEData[28] = TableStruct->framePrgCompDateTime[8];
-		protocol->ucFRAMEData[29] = TableStruct->framePrgCompDateTime[9];
-		protocol->ucFRAMEData[30] = TableStruct->framePrgCompDateTime[10];
-		protocol->ucFRAMEData[31] = TableStruct->framePrgCompDateTime[11];
-		protocol->ucFRAMEData[32] = TableStruct->framePrgCompDateTime[12];
-		protocol->ucFRAMEData[33] = TableStruct->framePrgCompDateTime[14];
-		protocol->ucFRAMEData[34] = TableStruct->framePrgCompDateTime[15];
+		/* __DATE__ format: "Mmm DD YYYY" (e.g. "Aug 18 2026")        */
+		/* date[0..2]  -> month (3 letters)                            */
+		/* date[3]     -> space (skipped)                              */
+		/* date[4..5]  -> day (DD)                                     */
+		/* date[6]     -> space (skipped)                              */
+		/* date[7..10] -> year (YYYY)                                  */
+		/* frame program compilation time as ASCII string              */
+		/* __TIME__ format: "HH:MM:SS" (e.g. "12:34:56")              */
+		/* time[0..1]  -> hour (HH)                                    */
+		/* time[2]     -> ':' (skipped)                                */
+		/* time[3..4]  -> minute (MM)                                  */
+		const compilationDate_t *dt = TableStruct->framePrgCompDateTime;
+		protocol->ucFRAMEData[22] = (uint8)dt->date[0];  /* month letter 1 */
+		protocol->ucFRAMEData[23] = (uint8)dt->date[1];  /* month letter 2 */
+		protocol->ucFRAMEData[24] = (uint8)dt->date[2];  /* month letter 3 */
+		protocol->ucFRAMEData[25] = (uint8)dt->date[4];  /* day digit 1    */
+		protocol->ucFRAMEData[26] = (uint8)dt->date[5];  /* day digit 2    */
+		protocol->ucFRAMEData[27] = (uint8)dt->date[7];  /* year digit 1   */
+		protocol->ucFRAMEData[28] = (uint8)dt->date[8];  /* year digit 2   */
+		protocol->ucFRAMEData[29] = (uint8)dt->date[9];  /* year digit 3   */
+		protocol->ucFRAMEData[30] = (uint8)dt->date[10]; /* year digit 4   */
+		protocol->ucFRAMEData[31] = (uint8)dt->time[0];  /* hour digit 1   */
+		protocol->ucFRAMEData[32] = (uint8)dt->time[1];  /* hour digit 2   */
+		protocol->ucFRAMEData[33] = (uint8)dt->time[3];  /* minute digit 1 */
+		protocol->ucFRAMEData[34] = (uint8)dt->time[4];  /* minute digit 2 */
 	}
 
 	protocol->ucFRAMEData[35] = (uint8)(TableStruct->DSPState & 0x00FF);

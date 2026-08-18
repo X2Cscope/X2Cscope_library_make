@@ -41,6 +41,12 @@
 
 #include "Target.h"
 
+/* Forward declaration — full definition is in interface/X2Cscope.h.
+ * A pointer to this type is sufficient for tTableStruct; files that
+ * dereference the pointer (Services.c, VersionInfo.c) include X2Cscope.h
+ * themselves via VersionInfo.h. */
+typedef struct compilationDate_type compilationDate_t;
+
 #define LOW(data)  ((data) & 0xFF)
 #define HIGH(data) (((uint16)(data)) >> 8)
 
@@ -263,7 +269,7 @@ struct tTableStruct {
     tProtocol* protocols[MAX_PROTOCOLS];
     
     uint16 framePrgVersion;
-    const uint8_t* framePrgCompDateTime;
+    const compilationDate_t* framePrgCompDateTime;
 
 	SCOPE_MAIN* piScope;
 

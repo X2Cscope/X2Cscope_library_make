@@ -43,5 +43,5 @@
 void initVersionInfo(volatile tTableStruct* tblStruct, uint16 appVersion, const compilationDate_t *compilationDate)
 {
 	tblStruct->framePrgVersion = appVersion;
-	tblStruct->framePrgCompDateTime = (const uint8_t*)compilationDate;
+	tblStruct->framePrgCompDateTime = compilationDate;
 }
