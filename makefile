@@ -7,13 +7,24 @@
 NUM_OF_PARALLEL_JOBS := 4
 LIB_OUT_DIR_PATH := dist/
 
-# compilers
+# compilers (can be overridden on the command line, e.g. make XC32_CC=...)
+# Keep the versions in sync with .github/workflows/release.yml
+XC32_VERSION  := v4.60
+XCDSC_VERSION := v4.00
 
-XC32_CC := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-gcc.exe"
-XC32_AR := "C:\Program Files\Microchip\xc32\v4.60\bin\xc32-ar.exe"
+ifeq ($(OS),Windows_NT)
+XC32_CC := "C:\Program Files\Microchip\xc32\$(XC32_VERSION)\bin\xc32-gcc.exe"
+XC32_AR := "C:\Program Files\Microchip\xc32\$(XC32_VERSION)\bin\xc32-ar.exe"
 
-XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\v4.00\bin\xc-dsc-gcc.exe"
-XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\v4.00\bin\xc-dsc-ar.exe"
+XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\$(XCDSC_VERSION)\bin\xc-dsc-gcc.exe"
+XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\$(XCDSC_VERSION)\bin\xc-dsc-ar.exe"
+else
+XC32_CC := /opt/microchip/xc32/$(XC32_VERSION)/bin/xc32-gcc
+XC32_AR := /opt/microchip/xc32/$(XC32_VERSION)/bin/xc32-ar
+
+XCDSC_CC := /opt/microchip/xc-dsc/$(XCDSC_VERSION)/bin/xc-dsc-gcc
+XCDSC_AR := /opt/microchip/xc-dsc/$(XCDSC_VERSION)/bin/xc-dsc-ar
+endif
 
 #----------------------------------
 # do not change the rest
@@ -23,31 +34,43 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR XCDSC_CC XCDSC_AR
 TARGETS = $(wildcard *.mk)
 
-TOPTARGETS := all clean
+TOPTARGETS := all clean release
 
 all: $(TARGETS) combine
+
+# Full rebuild of every archive in dist/. Used by the GitHub release workflow.
+release:
+	$(MAKE) clean
+	$(MAKE)
+	$(info Release archives:)
+	ls -l $(LIB_OUT_DIR_PATH)*.a
 clean: $(TARGETS)
 	$(info Removing all build directories _*/)
 	$(foreach d,$(wildcard _*/),$(shell rm -rf $(d)))
+	rm -f $(LIB_OUT_DIR_PATH)$(COMBINED_LIB)
 $(TARGETS):
 	$(MAKE) -f $@ $(MAKECMDGOALS)
 
 
 #XCDSC specific
+# Combined archive of all objects in _OBJXCDSC (not owned by any *.mk file)
+COMBINED_LIB := libx2cscope2-generic-pic24-dspic33-elf.a
 
 combine:
 	$(info Combining XCDSC libs)
 	$(eval XC_DSC_OBJ_FILES := ${wildcard _OBJXCDSC/*.o})
 	$(info obj files to combine: ${XC_DSC_OBJ_FILES})
-	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}libx2cscope2-generic-pic24-dspic33-elf.a  ${XC_DSC_OBJ_FILES}
+	rm -f ${LIB_OUT_DIR_PATH}$(COMBINED_LIB)
+	${XCDSC_AR} cvq ${LIB_OUT_DIR_PATH}$(COMBINED_LIB)  ${XC_DSC_OBJ_FILES}
 
 .PHONY: $(TOPTARGETS) $(TARGETS) combine
 
 else
 #----- Do not change the rest
 # relative to _OBJ dir
-SRC_DIR := ../X2Cscope/src
-INC_DIR := ../X2Cscope/inc -I../interface
+# Folder names are case sensitive on Linux (CI)
+SRC_DIR := ../X2CScope/src
+INC_DIR := ../X2CScope/inc -I../interface
 
 VPATH = $(SRC_DIR)
 
@@ -56,6 +79,7 @@ SET_ARCH := $(subst -mcpu=,,$(SET_PROCESSOR))
 SET_ARCH := $(subst -mprocessor=,,$(SET_ARCH))
 
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
+$(if $(SRC_FILES),,$(error No source files found in $(SRC_DIR)))
 SRC_FILES_WODIR := $(notdir ${SRC_FILES})
 OBJ_FILES := $(SRC_FILES_WODIR:%.c=${SET_ARCH}%.o)
 

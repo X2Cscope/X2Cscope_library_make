@@ -1,0 +1,85 @@
+# Builds every library archive with pinned XC compilers, zips them together
+# with the interface/ folder and attaches the zip to the GitHub release.
+#
+# Runs on the GitHub-hosted Ubuntu runner. The compilers are installed in
+# free mode on every run; the installers are cached between runs.
+name: Release package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to (re)build and upload, e.g. v3.2"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  # Keep in sync with XC32_VERSION / XCDSC_VERSION in makefile
+  XC32_VERSION: v4.60
+  XCDSC_VERSION: v4.00
+  INSTALLER_DIR: ${{ github.workspace }}/../xc-installers
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Cache compiler installers
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.INSTALLER_DIR }}
+          key: xc-installers-xc32-${{ env.XC32_VERSION }}-xcdsc-${{ env.XCDSC_VERSION }}
+
+      - name: Install XC32 ${{ env.XC32_VERSION }}
+        run: bash .github/scripts/install-xc.sh xc32 "$XC32_VERSION" "$INSTALLER_DIR"
+
+      - name: Install XC-DSC ${{ env.XCDSC_VERSION }}
+        run: bash .github/scripts/install-xc.sh xc-dsc "$XCDSC_VERSION" "$INSTALLER_DIR"
+
+      - name: Provide gnumkdir
+        # The makefiles call MPLAB's gnumkdir, which is plain mkdir on Linux
+        run: sudo ln -sf "$(command -v mkdir)" /usr/local/bin/gnumkdir
+
+      - name: Build all targets
+        run: make release XC32_VERSION="$XC32_VERSION" XCDSC_VERSION="$XCDSC_VERSION"
+
+      - name: Check that every target archive was built
+        run: |
+          missing=0
+          expected=$(sed -n 's/^TARGET_FILENAME[[:space:]]*:=[[:space:]]*//p' *.mk | tr -d '\r')
+          expected="$expected libx2cscope2-generic-pic24-dspic33-elf.a"
+          for lib in $expected; do
+            objs=$( [ -f "dist/$lib" ] && ar t "dist/$lib" | grep -c '\.o$' || true )
+            if [ "${objs:-0}" -gt 0 ]; then
+              echo "ok      dist/$lib ($objs objects)"
+            else
+              echo "::error::dist/$lib is missing or empty"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - name: Create zip
+        id: zip
+        run: |
+          major=$(echo "${TAG#v}" | cut -d. -f1)
+          name="libx2cscope${major}-elf_$(echo "$TAG" | tr . _).zip"
+          mkdir -p out
+          (cd dist && zip -X "../out/$name" *.a)
+          git ls-files interface | zip -X "out/$name" -@
+          unzip -l "out/$name"
+          echo "file=out/$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload zip to release
+        run: gh release upload "$TAG" "${{ steps.zip.outputs.file }}" --clobber
