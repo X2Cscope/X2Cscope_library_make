@@ -9,6 +9,7 @@ nbdist/
 debug/
 run/
 _*/
+.packs/
 .claude/
 .vscode/
 
