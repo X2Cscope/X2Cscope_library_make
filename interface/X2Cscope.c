@@ -82,17 +82,18 @@ void X2Cscope_Init(void)
     /* X2CSCOPE_CONFIG_INIT requires all 9 parameters. Omitting or reordering
      * any argument causes a compile-time error, catching the most common
      * integration mistakes before the code ever runs.
-     * flushSerial is optional: pass NULL if your peripheral does not need it. */
+     * X2CscopeComm_Flush is optional: pass NULL if your peripheral does not
+     * need it. */
     X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-        sendSerial,                 /* send one byte          (required) */
-        receiveSerial,              /* receive one byte       (required) */
-        isReceiveDataAvailable,     /* RX data ready flag     (required) */
-        isSendReady,                /* TX buffer not full     (required) */
-        flushSerial,                /* flush/commit TX buffer (NULL if unused) */
-        (void*)X2CscopeArray,       /* scope data buffer      (required) */
-        X2CSCOPE_BUFFER_SIZE,       /* scope buffer size      (required) */
-        X2CSCOPE_APP_VERSION,       /* app version identifier (required) */
-        compilationDate             /* build timestamp        (required) */
+        X2CscopeComm_SendByte,          /* send one byte          (required) */
+        X2CscopeComm_ReceiveByte,       /* receive one byte       (required) */
+        X2CscopeComm_IsByteAvailable,   /* RX data ready flag     (required) */
+        X2CscopeComm_IsSendReady,       /* TX buffer not full     (required) */
+        X2CscopeComm_Flush,             /* flush/commit TX buffer (NULL if unused) */
+        (void*)X2CscopeArray,           /* scope data buffer      (required) */
+        X2CSCOPE_BUFFER_SIZE,           /* scope buffer size      (required) */
+        X2CSCOPE_APP_VERSION,           /* app version identifier (required) */
+        compilationDate                 /* build timestamp        (required) */
     );
     X2Cscope_InitialiseEx(&config);
     X2CscopeComm_PostInit();

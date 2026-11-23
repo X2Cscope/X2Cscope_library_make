@@ -47,10 +47,10 @@ rather than a struct), replace the calls in the four callback bodies accordingly
 
 ```c
 // Direct function call alternative (e.g. older MCC Classic drivers):
-void sendSerial(uint8_t data)             { UART1_Write(data); }
-uint8_t receiveSerial(void)               { return UART1_Read(); }
-uint8_t isReceiveDataAvailable(void)      { return (uint8_t)UART1_IsRxReady(); }
-uint8_t isSendReady(void)                 { return (uint8_t)UART1_IsTxReady(); }
+void    X2CscopeComm_SendByte(uint8_t data)  { UART1_Write(data); }
+uint8_t X2CscopeComm_ReceiveByte(void)       { return UART1_Read(); }
+bool    X2CscopeComm_IsByteAvailable(void)   { return UART1_IsRxReady(); }
+bool    X2CscopeComm_IsSendReady(void)       { return UART1_IsTxReady(); }
 ```
 
 ## Application Integration
