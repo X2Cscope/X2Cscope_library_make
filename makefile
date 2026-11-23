@@ -12,15 +12,20 @@ LIB_OUT_DIR_PATH := dist/
 XC32_VERSION  := v4.60
 XCDSC_VERSION := v4.00
 
+# XC32_ARM_CC is XC32's ARM compiler (pic32c-gcc). xc32-gcc selects it only
+# when a device is given with -mprocessor; calling it directly allows generic
+# Cortex-M builds with -mcpu/-mfpu/-mfloat-abi and no device pack.
 ifeq ($(OS),Windows_NT)
 XC32_CC := "C:\Program Files\Microchip\xc32\$(XC32_VERSION)\bin\xc32-gcc.exe"
 XC32_AR := "C:\Program Files\Microchip\xc32\$(XC32_VERSION)\bin\xc32-ar.exe"
+XC32_ARM_CC := "C:\Program Files\Microchip\xc32\$(XC32_VERSION)\bin\bin\pic32c-gcc.exe"
 
 XCDSC_CC := "C:\Program Files\Microchip\xc-dsc\$(XCDSC_VERSION)\bin\xc-dsc-gcc.exe"
 XCDSC_AR := "C:\Program Files\Microchip\xc-dsc\$(XCDSC_VERSION)\bin\xc-dsc-ar.exe"
 else
 XC32_CC := /opt/microchip/xc32/$(XC32_VERSION)/bin/xc32-gcc
 XC32_AR := /opt/microchip/xc32/$(XC32_VERSION)/bin/xc32-ar
+XC32_ARM_CC := /opt/microchip/xc32/$(XC32_VERSION)/bin/bin/pic32c-gcc
 
 XCDSC_CC := /opt/microchip/xc-dsc/$(XCDSC_VERSION)/bin/xc-dsc-gcc
 XCDSC_AR := /opt/microchip/xc-dsc/$(XCDSC_VERSION)/bin/xc-dsc-ar
@@ -31,7 +36,7 @@ endif
 # Output dirs start with underscore
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
 # execute all *.mk files
-export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR XCDSC_CC XCDSC_AR
+export LIB_OUT_DIR_PATH XC16_CC XC16_AR XC32_CC XC32_AR XC32_ARM_CC XCDSC_CC XCDSC_AR
 TARGETS = $(wildcard *.mk)
 
 TOPTARGETS := all clean release

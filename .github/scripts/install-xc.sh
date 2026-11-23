@@ -43,3 +43,12 @@ else
 fi
 
 "$cc" --version | head -n 1
+
+# The generic Cortex-M targets call XC32's ARM compiler directly (see makefile)
+if [ "$name" = xc32 ]; then
+  arm_cc=$prefix/bin/bin/pic32c-gcc
+  if [ ! -x "$arm_cc" ]; then
+    echo "XC32 ARM compiler not found: $arm_cc" >&2; exit 1
+  fi
+  "$arm_cc" --version | head -n 1
+fi

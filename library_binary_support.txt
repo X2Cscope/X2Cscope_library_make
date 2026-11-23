@@ -10,7 +10,31 @@ for the non-MLarge 16-bit XC-DSC families; it is not a validated
 multi-architecture library for dsPIC33AK.
 
 The processor options below are taken from the corresponding *.mk build
-files. XC-DSC targets use -mcpu=; XC32 targets use -mprocessor=.
+files. XC-DSC targets use -mcpu=; XC32 PIC32M targets use -mprocessor=.
+The Cortex-M targets are generic: they call XC32's ARM compiler (pic32c-gcc)
+with core options only, without -mprocessor and without a device pack.
+
+Cortex-M: which library for which device
+----------------------------------------
+Pick the library by core and FPU of the device (see the device data sheet
+or the Dcore/Dfpu entries of its device pack):
+
+  Core / FPU                     Library                    Example families
+  -----------------------------  -------------------------  ---------------------------------
+  Cortex-M0+, no FPU             libx2cscope2-cm0-elf.a     SAM D/C/L/R, PIC32CM PL/JH/MC/GV
+  Cortex-M23, no FPU             libx2cscope2-cm0-elf.a     PIC32CM LE/LS/GC00/SG00, SAML10/11
+  Cortex-M4,  no FPU             libx2cscope2-cm0-elf.a     PIC32CX-SG
+  Cortex-M4,  SP FPU (M4F)       libx2cscope2-cm4-elf.a     SAME5x, SAMD51, SAMG, PIC32CX BZ/MT/SG4x/SG6x
+  Cortex-M7,  DP FPU             libx2cscope2-cm7-elf.a     SAME70, SAMS70, SAMV7x, SAMRH7x, PIC32CZ CA/MC
+  Cortex-M33, SP FPU + DSP       libx2cscope2-cm33-elf.a    PIC32CK SG/GC
+
+The application must use the same float ABI as the library: soft-float for
+cm0, hard-float for cm4/cm7/cm33 (XC32 default for devices with FPU). A
+mismatch is reported by the linker ("uses VFP register arguments").
+Exception: libx2cscope2-cm7-elf.a also links into Cortex-M4F and Cortex-M33
+projects, but uses double-precision FPU instructions that these cores do not
+have; it faults at runtime (scope trigger on a double channel). Never use
+the cm7 library on a device without a double-precision FPU.
 
 Binary: libx2cscope-generic-16bit-pic24-elf.a
 Build file: generic-16bit.mk
@@ -82,32 +106,35 @@ Processor option: -mprocessor=32MZ2048EFH144
 Supports: PIC32MZ devices
 
 Binary: libx2cscope2-cm0-elf.a
-Build file: cm0_samd21.mk
-Processor option: -mprocessor=ATSAMD21G18A
-Supports: ARM Cortex-M0/M0+ devices; configured for SAMD21
+Build file: cortex-m0plus.mk
+Processor option: -mcpu=cortex-m0plus (pic32c-gcc, no device pack)
+Additional options: -mthumb -mfloat-abi=soft
+Supports: every Cortex-M device without FPU (M0+, M23, M4 without FPU)
+ABI: ARMv6-M, soft-float. ARMv6-M code runs on all Cortex-M cores.
 
 Binary: libx2cscope2-cm4-elf.a
-Build file: cm4_same54.mk
-Processor option: -mprocessor=ATSAME54N20A
-Supports: ARM Cortex-M4 devices; configured for SAME54
+Build file: cortex-m4f.mk
+Processor option: -mcpu=cortex-m4 (pic32c-gcc, no device pack)
+Additional options: -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
+Supports: Cortex-M4F devices (single-precision FPU)
+ABI: ARMv7E-M, FPv4-SP hard-float.
 
 Binary: libx2cscope2-cm7-elf.a
-Build file: cm7_same70.mk
-Processor option: -mprocessor=ATSAME70N20B
-Supports: ARM Cortex-M7 devices; configured for SAME70
+Build file: cortex-m7.mk
+Processor option: -mcpu=cortex-m7 (pic32c-gcc, no device pack)
+Additional options: -mthumb -mfloat-abi=hard -mfpu=fpv5-d16
+Supports: Cortex-M7 devices with double-precision FPU (all Microchip M7)
+ABI: ARMv7E-M, FPv5 double-precision hard-float. Not for M4F/M33 devices,
+     see "Cortex-M: which library for which device" above.
 
 Binary: libx2cscope2-cm33-elf.a
-Build file: cm33_pic32ck.mk
-Processor option: -mprocessor=PIC32CK2051SG01064
-Additional options: -mdfp=<PIC32CK-SG_DFP>/PIC32CK-SG01 (downloaded
-                    automatically from packs.download.microchip.com)
-Supports: ARM Cortex-M33 PIC32CK devices (SG01, MC80, MC90);
-          verified object-identical for PIC32CK2051SG01064,
-          PIC32CK2596MC90064 and PIC32CK2596MC80064
-ABI: ARMv8-M mainline, FPv5-SP hard-float, DSP extension. The application
-     must also use the hard-float ABI (XC32 default for these devices).
-     Usable in TrustZone secure or non-secure projects and in non-TrustZone
-     devices (MC80).
+Build file: cortex-m33.mk
+Processor option: -mcpu=cortex-m33 (pic32c-gcc, no device pack)
+Additional options: -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16
+Supports: Cortex-M33 devices with FPU and DSP extension (PIC32CK SG/GC)
+ABI: ARMv8-M mainline, FPv5-SP hard-float, DSP extension. Usable in
+     TrustZone secure or non-secure projects and on devices without
+     TrustZone.
 
 Binary: libx2cscope2-generic-pic24-dspic33-elf.a
 Build file: makefile (combine target)
@@ -125,7 +152,11 @@ Notes
    target uses the shared XC-DSC object directory. However, this produces a
    mixed-architecture archive and should not be considered a validated
    dsPIC33AK library. Use the dedicated dsPIC33AK archive instead.
-4. The Cortex makefiles use ARM processor selections, but currently define
-   __GENERIC_MICROCHIP_PIC32__ for X2Cscope device-info reporting. Therefore,
-   the Cortex binaries are ARM-compatible, while their reported device-info
-   family may identify as PIC32.
+4. The Cortex makefiles define __GENERIC_MICROCHIP_PIC32__ for X2Cscope
+   device-info reporting. Therefore, the Cortex binaries are ARM-compatible,
+   while their reported device-info family may identify as PIC32.
+5. The generic Cortex binaries produce the same code as the former
+   device-specific builds (ATSAMD21G18A, ATSAME54N20A, ATSAME70N20B,
+   PIC32CK2051SG01064) with XC32 v4.60. They were link-tested with
+   ATSAMD21G18A, PIC32CM6408PL10048, PIC32CM5164LE00048, ATSAME54N20A,
+   ATSAME70N20B, ATSAMV71Q21B and PIC32CK2051SG01064 projects.
