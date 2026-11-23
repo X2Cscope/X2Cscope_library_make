@@ -55,9 +55,21 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 #include "X2CscopeComm.h"
 #include "X2Cscope.h"
 
-/* Scope data buffer.
- * Size is controlled by X2CSCOPE_BUFFER_SIZE (default 5000 bytes).
- * Override by defining X2CSCOPE_BUFFER_SIZE before including X2Cscope.h. */
+/* X2Cscope buffer size in bytes, uses the specified bytes from RAM.
+ * Change the default here or override it on the compiler command line,
+ * e.g. -DX2CSCOPE_BUFFER_SIZE=8000 */
+#ifndef X2CSCOPE_BUFFER_SIZE
+#define X2CSCOPE_BUFFER_SIZE 5000
+#endif
+
+/* X2Cscope Get Device Info service, 2 bytes.
+ * Application specific, can be customized.
+ * Reserved APP versions, do not use: 0x1000 - 0x3FFF */
+#ifndef X2CSCOPE_APP_VERSION
+#define X2CSCOPE_APP_VERSION 0x0001
+#endif
+
+/* Scope data buffer, X2CSCOPE_BUFFER_SIZE bytes. */
 int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE];
 
 /* Build date/time stamp — read out by the X2Cscope "Get Device Info" service.

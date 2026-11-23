@@ -48,24 +48,15 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
 
 /**
  * This file collects all X2Cscope external application interfaces that can be used.
+ * It contains only the public API (types and function prototypes).
+ * Configuration such as the scope buffer size and the application version
+ * is located in X2Cscope.c.
  */
 #ifndef X2CSCOPE_H
 #define X2CSCOPE_H
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-//X2Cscope buffer size in bytes, uses the specified bytes from RAM
-#ifndef X2CSCOPE_BUFFER_SIZE
-#define X2CSCOPE_BUFFER_SIZE 5000
-#endif
-
-//X2Cscope Get Device Info service, 2 bytes
-//Application specific, can be customized. 
-//Reserved APP versions, do not use: 0x1000 - 0x3FFF 
-#ifndef X2CSCOPE_APP_VERSION
-#define X2CSCOPE_APP_VERSION 0x0001
 #endif
 
 typedef struct compilationDate_type {

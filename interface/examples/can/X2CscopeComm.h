@@ -22,7 +22,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "X2Cscope.h"  /* compilationDate_t, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION */
+#include "X2Cscope.h"  /* compilationDate_t */
 
 /**
  * @brief Unified configuration structure for X2Cscope initialization.
