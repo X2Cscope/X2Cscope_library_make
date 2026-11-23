@@ -59,7 +59,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "X2Cscope.h"  /* compilationDate_t, X2CSCOPE_BUFFER_SIZE, X2CSCOPE_APP_VERSION */
+#include "X2Cscope.h"  /* compilationDate_t */
 
 /**
  * @brief Unified configuration structure for X2Cscope initialization.
@@ -79,7 +79,7 @@ typedef struct {
     void    (*flushSerial)(void);               /**< Optional: Flush/commit TX buffer (set NULL if unused) */
     /* Scope buffer */
     void*    scopeArray;                        /**< Required: Pointer to scope data buffer allocated by the application */
-    uint16_t scopeSize;                         /**< Required: Size of scopeArray in bytes (see X2CSCOPE_BUFFER_SIZE) */
+    uint16_t scopeSize;                         /**< Required: Size of scopeArray in bytes (see X2CSCOPE_BUFFER_SIZE in X2Cscope.c) */
     /* Application info */
     uint16_t                appVersion;          /**< Application version identifier (0x0001 default) */
     const compilationDate_t *compilationDate;   /**< Pointer to build timestamp — must have static storage duration */

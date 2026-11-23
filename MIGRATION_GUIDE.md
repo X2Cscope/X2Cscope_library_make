@@ -58,6 +58,19 @@ bool isReceiveDataAvailable(void) { return UART1_IsRxReady(); }
 bool isSendReady(void)            { return UART1_IsTxReady(); }
 ```
 
+### 6. `X2CSCOPE_BUFFER_SIZE` and `X2CSCOPE_APP_VERSION` moved to `X2Cscope.c`
+
+`X2Cscope.h` now contains only the public API (`compilationDate_t` and the
+function prototypes). The two configuration defaults are defined in
+`interface/X2Cscope.c`, the only file that uses them.
+
+- If you override them on the compiler command line
+  (e.g. `-DX2CSCOPE_BUFFER_SIZE=8000`), nothing changes.
+- If you changed the values directly in `X2Cscope.h`, apply the same change in
+  `X2Cscope.c`, or the defaults (5000 bytes, `0x0001`) are used.
+- If your own code referenced either macro through `X2Cscope.h`, define it
+  where you use it.
+
 ---
 
 ## Current API
@@ -68,7 +81,15 @@ Declare the scope buffer and the build timestamp at file scope, then fill a
 config struct and call `X2Cscope_InitialiseEx()`:
 
 ```c
-/* Scope data buffer — size controlled by X2CSCOPE_BUFFER_SIZE (default 5000). */
+/* Configuration defaults; override with -D on the compiler command line. */
+#ifndef X2CSCOPE_BUFFER_SIZE
+#define X2CSCOPE_BUFFER_SIZE 5000   /* scope buffer size in bytes (RAM) */
+#endif
+#ifndef X2CSCOPE_APP_VERSION
+#define X2CSCOPE_APP_VERSION 0x0001 /* app version; 0x1000 - 0x3FFF are reserved */
+#endif
+
+/* Scope data buffer. */
 int8_t X2CscopeArray[X2CSCOPE_BUFFER_SIZE];
 
 /* Build timestamp — must be global or static; the library stores a pointer to it. */
