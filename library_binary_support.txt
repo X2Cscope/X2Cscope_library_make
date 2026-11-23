@@ -1,0 +1,131 @@
+X2Cscope Library Binary Support Matrix
+=======================================
+
+Summary
+-------
+Use libx2cscope-generic-32dsp-dspic33a-elf.a or
+libx2cscope-generic-32dsp-dspic33a-mlarge-elf.a for dsPIC33AK devices.
+The combined libx2cscope2-generic-pic24-dspic33-elf.a archive is intended
+for the non-MLarge 16-bit XC-DSC families; it is not a validated
+multi-architecture library for dsPIC33AK.
+
+The processor options below are taken from the corresponding *.mk build
+files. XC-DSC targets use -mcpu=; XC32 targets use -mprocessor=.
+
+Binary: libx2cscope-generic-16bit-pic24-elf.a
+Build file: generic-16bit.mk
+Processor option: -mcpu=generic-16bit
+Supports: Generic 16-bit PIC24 devices
+
+Binary: libx2cscope-generic-16bit-pic24e-elf.a
+Build file: generic-16bit-ep.mk
+Processor option: -mcpu=generic-16bit-ep
+Supports: PIC24E/PIC24EP devices
+
+Binary: libx2cscope-generic-16bit-pic24f_da-elf.a
+Build file: generic-16bit-da.mk
+Processor option: -mcpu=generic-16bit-da
+Supports: PIC24F-DA devices
+
+Binary: libx2cscope2-generic-16dsp-dspic33f-dspic30-elf.a
+Build file: generic-16dsp.mk
+Processor option: -mcpu=generic-16dsp
+Supports: dsPIC33F and dsPIC30 devices
+
+Binary: libx2cscope-generic-16dsp-dspic33e-elf.a
+Build file: generic-16dsp-ep.mk
+Processor option: -mcpu=generic-16dsp-ep
+Supports: dsPIC33E devices
+
+Binary: libx2cscope-generic-16dsp-dspic33c-elf.a
+Build file: generic-16dsp-ch.mk
+Processor option: -mcpu=generic-16dsp-ch
+Supports: dsPIC33C, dsPIC33CK, dsPIC33CH, and dsPIC33CDVx (L/V)
+
+Binary: libx2cscope-generic-16dsp-dspic33c-mlarge-elf.a
+Build file: generic-16dsp-ch-mlarge.mk
+Processor option: -mcpu=generic-16dsp-ch
+Additional options: -mlarge-code -mlarge-data
+Supports: dsPIC33C, dsPIC33CK, dsPIC33CH, and dsPIC33CDVx (L/V)
+Memory model: Large code/data model
+
+Binary: libx2cscope-generic-32dsp-dspic33a-elf.a
+Build file: generic-32dsp-ak.mk
+Processor option: -mcpu=generic-32dsp-ak
+Supports: 32-bit dsPIC33AK devices
+
+Binary: libx2cscope-generic-32dsp-dspic33a-mlarge-elf.a
+Build file: generic-32dsp-ak-mlarge.mk
+Processor option: -mcpu=generic-32dsp-ak
+Additional options: -mlarge-code -mlarge-data
+Supports: 32-bit dsPIC33AK devices
+Memory model: Large code/data model
+
+Binary: libx2cscope2-32mx-elf.a
+Build file: pic32mx.mk
+Processor option: -mprocessor=32MX250F128B
+Supports: PIC32MX devices
+
+Binary: libx2cscope2-32mm-elf.a
+Build file: pic32mm.mk
+Processor option: -mprocessor=32MM0256GPM064
+Supports: PIC32MM devices
+
+Binary: libx2cscope2-32mk-elf.a
+Build file: pic32mk.mk
+Processor option: -mprocessor=32MK1024MCM100
+Supports: PIC32MK devices
+
+Binary: libx2cscope2-32mz-elf.a
+Build file: pic32mz.mk
+Processor option: -mprocessor=32MZ2048EFH144
+Supports: PIC32MZ devices
+
+Binary: libx2cscope2-cm0-elf.a
+Build file: cm0_samd21.mk
+Processor option: -mprocessor=ATSAMD21G18A
+Supports: ARM Cortex-M0/M0+ devices; configured for SAMD21
+
+Binary: libx2cscope2-cm4-elf.a
+Build file: cm4_same54.mk
+Processor option: -mprocessor=ATSAME54N20A
+Supports: ARM Cortex-M4 devices; configured for SAME54
+
+Binary: libx2cscope2-cm7-elf.a
+Build file: cm7_same70.mk
+Processor option: -mprocessor=ATSAME70N20B
+Supports: ARM Cortex-M7 devices; configured for SAME70
+
+Binary: libx2cscope2-cm33-elf.a
+Build file: cm33_pic32ck.mk
+Processor option: -mprocessor=PIC32CK2051SG01064
+Additional options: -mdfp=<PIC32CK-SG_DFP>/PIC32CK-SG01 (downloaded
+                    automatically from packs.download.microchip.com)
+Supports: ARM Cortex-M33 PIC32CK devices (SG01, MC80, MC90);
+          verified object-identical for PIC32CK2051SG01064,
+          PIC32CK2596MC90064 and PIC32CK2596MC80064
+ABI: ARMv8-M mainline, FPv5-SP hard-float, DSP extension. The application
+     must also use the hard-float ABI (XC32 default for these devices).
+     Usable in TrustZone secure or non-secure projects and in non-TrustZone
+     devices (MC80).
+
+Binary: libx2cscope2-generic-pic24-dspic33-elf.a
+Build file: makefile (combine target)
+Processor option: Combined archive; no single processor option
+Supports: Non-MLarge PIC24, dsPIC30, dsPIC33F, dsPIC33E,
+          dsPIC33C, dsPIC33CK, dsPIC33CH, and dsPIC33CDVx (L/V)
+
+Notes
+-----
+1. Generic binaries target an architecture/family, not necessarily every
+   device revision. The application must use a compatible compiler, linker
+   configuration, device headers, and memory model.
+2. The -mlarge binaries are not interchangeable with the normal variants.
+3. The combine step also collects normal dsPIC33AK objects because that
+   target uses the shared XC-DSC object directory. However, this produces a
+   mixed-architecture archive and should not be considered a validated
+   dsPIC33AK library. Use the dedicated dsPIC33AK archive instead.
+4. The Cortex makefiles use ARM processor selections, but currently define
+   __GENERIC_MICROCHIP_PIC32__ for X2Cscope device-info reporting. Therefore,
+   the Cortex binaries are ARM-compatible, while their reported device-info
+   family may identify as PIC32.
