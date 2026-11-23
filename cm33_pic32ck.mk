@@ -21,7 +21,10 @@ DFP_VERSION   ?= latest
 PACK_SERVER   := https://packs.download.microchip.com
 PACKS_DIR     := .packs
 DFP_ROOT      := $(PACKS_DIR)/$(DFP_NAME)
-DFP_STAMP     := $(DFP_ROOT)/$(DFP_SUBFAMILY)/xc32
+# VERSION is written as the last step of the download recipe, so it only
+# exists after a complete download and extraction. An interrupted download
+# leaves no VERSION file and is downloaded again on the next build.
+DFP_STAMP     := $(DFP_ROOT)/VERSION
 
 # Additional arguments for the compiler (path is relative to $(OBJDIR))
 SET_ARGS := -mdfp=../$(DFP_ROOT)/$(DFP_SUBFAMILY)
@@ -82,7 +85,7 @@ $(DFP_STAMP):
 	curl -fL --retry 3 -o $(DFP_ROOT).atpack $(PACK_SERVER)/Microchip.$(DFP_NAME).$(DFP_RESOLVED).atpack
 	$(call EXTRACT,$(DFP_ROOT).atpack,$(DFP_ROOT))
 	rm -f $(DFP_ROOT).atpack
-	echo $(DFP_RESOLVED)> $(DFP_ROOT)/VERSION
+	echo $(DFP_RESOLVED)> $(DFP_STAMP)
 
 .PHONY: dfp update-dfp
 dfp: $(DFP_STAMP)
