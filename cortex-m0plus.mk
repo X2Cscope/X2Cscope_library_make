@@ -6,15 +6,21 @@ TARGET_FILENAME := libx2cscope2-cm0-elf.a
 # Object dir must start with underscore!
 OBJDIR := _CM0
 
-# Compiler specific CPU selection directive (-mcpu=xx -> XC16 -mprocessor=xx -> XC32 )
-SET_PROCESSOR := -mprocessor=ATSAMD21G18A
+# Generic Cortex-M build without FPU: XC32's ARM compiler with core options
+# only (no -mprocessor, no device pack). ARMv6-M code with the soft-float ABI
+# runs on every Cortex-M core and links into every soft-float project:
+#   Cortex-M0+ (SAM D/C/L/R, PIC32CM PL/JH/MC/GV)
+#   Cortex-M23 (PIC32CM LE/LS/GC00/SG00, SAML10/11)
+#   Cortex-M4 without FPU (PIC32CX-SG)
+SET_PROCESSOR := -mcpu=cortex-m0plus
+SET_ARGS := -mthumb -mfloat-abi=soft
 
 # Set MCU family and scope size for X2C Scope
 DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_PIC32__
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := $(XC32_CC)
+CC := $(XC32_ARM_CC)
 AR := $(XC32_AR)
 
 #-----------------------------------------------------
@@ -25,6 +31,7 @@ MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
 	CC=$(CC) \
 	AR=$(AR) \
 	SET_PROCESSOR=$(SET_PROCESSOR) \
+	SET_ARGS="$(SET_ARGS)" \
 	DEFINE_X2C_MCU_FAMILY=$(DEFINE_X2C_MCU_FAMILY) \
 	OPTIMISATION=$(OPTIMISATION) \
 	$(MAKECMDGOALS)

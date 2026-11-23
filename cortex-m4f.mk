@@ -6,15 +6,19 @@ TARGET_FILENAME := libx2cscope2-cm4-elf.a
 # Object dir must start with underscore!
 OBJDIR := _CM4
 
-# Compiler specific CPU selection directive (-mcpu=xx -> XC16 -mprocessor=xx -> XC32 )
-SET_PROCESSOR := -mprocessor=ATSAME54N20A
+# Generic Cortex-M4F build: XC32's ARM compiler with core options only
+# (no -mprocessor, no device pack). ARMv7E-M, FPv4-SP, hard-float ABI:
+#   SAME5x, SAMD51, SAMG, PIC32CX BZ/MT/SG41/SG60/SG61
+# Not for Cortex-M4 devices without FPU: use libx2cscope2-cm0-elf.a.
+SET_PROCESSOR := -mcpu=cortex-m4
+SET_ARGS := -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 # Set MCU family and scope size for X2C Scope
 DEFINE_X2C_MCU_FAMILY := __GENERIC_MICROCHIP_PIC32__
 
 OPTIMISATION := -O2
 #Compilers to use
-CC := $(XC32_CC)
+CC := $(XC32_ARM_CC)
 AR := $(XC32_AR)
 
 #-----------------------------------------------------
@@ -25,6 +29,7 @@ MAKETARGET = $(MAKE) -C $(OBJDIR) -f "$(CURDIR)/makefile" \
 	CC=$(CC) \
 	AR=$(AR) \
 	SET_PROCESSOR=$(SET_PROCESSOR) \
+	SET_ARGS="$(SET_ARGS)" \
 	DEFINE_X2C_MCU_FAMILY=$(DEFINE_X2C_MCU_FAMILY) \
 	OPTIMISATION=$(OPTIMISATION) \
 	$(MAKECMDGOALS)
