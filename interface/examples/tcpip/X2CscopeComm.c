@@ -12,10 +12,10 @@
  * Protocol framing:
  *   X2Cscope uses a byte-stream protocol (LNet). TCP carries it natively —
  *   no CAN-style framing is needed. TX bytes are accumulated per LNet frame
- *   and sent as a single TCP segment by flushSerial(), minimising TCP overhead
+ *   and sent as a single TCP segment by X2CscopeComm_Flush(), minimising TCP overhead
  *   and preventing Nagle-algorithm delays. Received TCP data is pushed
  *   byte-by-byte into a circular buffer by the TCP receive callback and drained
- *   by receiveSerial().
+ *   by X2CscopeComm_ReceiveByte().
  *
  * Integration checklist:
  *   1. Copy X2CscopeComm.c and X2CscopeComm.h into your project's X2Cscope folder.
@@ -44,7 +44,7 @@
 
 /* -------------------------------------------------------------------------
  * RX circular buffer.
- * Filled by the TCP receive callback; drained by receiveSerial().
+ * Filled by the TCP receive callback; drained by X2CscopeComm_ReceiveByte().
  * Size must be a power of 2.
  * ------------------------------------------------------------------------- */
 #define TCP_RX_BUFSIZE  256u
@@ -52,14 +52,14 @@
 typedef struct {
     uint8_t           buf[TCP_RX_BUFSIZE];
     volatile uint16_t head;     /* write index (TCP receive callback) */
-    volatile uint16_t tail;     /* read  index (receiveSerial)        */
+    volatile uint16_t tail;     /* read  index (X2CscopeComm_ReceiveByte)        */
 } RxCircularBuffer;
 
 static RxCircularBuffer rx_buf = {0};
 
 /* -------------------------------------------------------------------------
  * TX accumulation buffer.
- * Bytes are collected here and sent as a single TCP segment by flushSerial().
+ * Bytes are collected here and sent as a single TCP segment by X2CscopeComm_Flush().
  * 516 bytes covers the maximum LNet frame (255 payload + overhead).
  * ------------------------------------------------------------------------- */
 #define TCP_TX_BUFSIZE  516u
@@ -104,9 +104,9 @@ static void receiveTcpData(void *cfg, const uint8_t *data, uint16_t len)
 
 /**
  * @brief Accumulate one byte into the TX buffer.
- * The buffer is sent as a single TCP segment by flushSerial().
+ * The buffer is sent as a single TCP segment by X2CscopeComm_Flush().
  */
-void sendSerial(uint8_t data)
+void X2CscopeComm_SendByte(uint8_t data)
 {
     if (tx_head < TCP_TX_BUFSIZE)
     {
@@ -116,9 +116,9 @@ void sendSerial(uint8_t data)
 
 /**
  * @brief Return one byte from the RX circular buffer.
- * Only called when isReceiveDataAvailable() has returned non-zero.
+ * Only called when X2CscopeComm_IsByteAvailable() has returned non-zero.
  */
-uint8_t receiveSerial(void)
+uint8_t X2CscopeComm_ReceiveByte(void)
 {
     if (rx_buf.head == rx_buf.tail) { return 0u; }
     uint8_t data = rx_buf.buf[rx_buf.tail];
@@ -130,7 +130,7 @@ uint8_t receiveSerial(void)
  * @brief Check whether at least one received byte is waiting.
  * @return true if RX data available, false otherwise.
  */
-bool isReceiveDataAvailable(void)
+bool X2CscopeComm_IsByteAvailable(void)
 {
     return (rx_buf.head != rx_buf.tail);
 }
@@ -139,7 +139,7 @@ bool isReceiveDataAvailable(void)
  * @brief TCP is always ready from the firmware side — TX is buffered.
  * @return true always.
  */
-bool isSendReady(void)
+bool X2CscopeComm_IsSendReady(void)
 {
     return true;
 }
@@ -149,7 +149,7 @@ bool isSendReady(void)
  * Called by the X2Cscope library at the end of each LNet frame.
  * Sending one segment per LNet frame avoids Nagle-algorithm delays.
  */
-void flushSerial(void)
+void X2CscopeComm_Flush(void)
 {
     tcp_server_send(&x2cscope_tcp_server, tx_buf, tx_head);
     tx_head = 0u;

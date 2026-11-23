@@ -74,7 +74,7 @@ void X2CscopeComm_PostInit(void)
     Puts the data to the hardware layer. (UART)
    @param[in] data Data to send 
  */
-void sendSerial(uint8_t data)
+void X2CscopeComm_SendByte(uint8_t data)
 {
 #error "Implement your send byte function, then delete this line."
 /* Example:
@@ -88,7 +88,7 @@ void sendSerial(uint8_t data)
   @return
     Return the received data
  */
-uint8_t receiveSerial()
+uint8_t X2CscopeComm_ReceiveByte()
 {
 #error "Implement your receive byte function, then delete this line."
 /* Example:
@@ -107,7 +107,7 @@ uint8_t receiveSerial()
     True -> Serial data ready to read.
     False -> No data.
  */
-bool isReceiveDataAvailable()
+bool X2CscopeComm_IsByteAvailable()
 {
 #error "Implement your receive byte available function, then delete this line."
 /*Example:
@@ -122,7 +122,7 @@ bool isReceiveDataAvailable()
     True -> Transmit buffer is not full, at least one more character can be written.
     False -> Transmit buffer is full.
  */
-bool isSendReady()
+bool X2CscopeComm_IsSendReady()
 {
 #error "Implement your send byte possible function, then delete this line."
 /*Example:
@@ -136,7 +136,7 @@ bool isSendReady()
    @param[in] serial Serial interface object. (Not used)
    @param[in] data Data to send 
  */
-void flushSerial(void)
+void X2CscopeComm_Flush(void)
 {
 #error "Implement your flush function, then delete this line."
 /* Example:

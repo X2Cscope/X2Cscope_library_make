@@ -11,10 +11,10 @@
  * Protocol framing:
  *   X2Cscope uses a byte-stream protocol (LNet). CAN carries fixed-size frames,
  *   so bytes are accumulated in a small TX buffer and sent as 8-byte CAN frames.
- *   sendSerial() fires a frame automatically every 8 bytes. flushSerial() sends
+ *   X2CscopeComm_SendByte() fires a frame automatically every 8 bytes. X2CscopeComm_Flush() sends
  *   any remaining bytes at the end of each LNet frame as a partial frame.
  *   Received CAN frames are pushed byte-by-byte into a software ring buffer;
- *   receiveSerial() and isReceiveDataAvailable() drain it one byte at a time.
+ *   X2CscopeComm_ReceiveByte() and X2CscopeComm_IsByteAvailable() drain it one byte at a time.
  *
  * Integration checklist:
  *   1. Copy X2CscopeComm.c and X2CscopeComm.h into your project's X2Cscope folder.
@@ -44,7 +44,7 @@
 /* -------------------------------------------------------------------------
  * RX ring buffer.
  * Filled by X2CscopeComm_Communicate() from incoming CAN frames.
- * Drained one byte at a time by receiveSerial().
+ * Drained one byte at a time by X2CscopeComm_ReceiveByte().
  * Size must be a power of 2 (RING_SZ = 2^RING_BITS).
  * ------------------------------------------------------------------------- */
 #define RING_BITS   5u
@@ -58,7 +58,7 @@ static volatile uint8_t rx_tail;        /* read  index */
 /* -------------------------------------------------------------------------
  * TX accumulation buffer.
  * Bytes are collected here; a CAN frame is sent every 8 bytes.
- * flushSerial() sends any remaining bytes as a shorter frame.
+ * X2CscopeComm_Flush() sends any remaining bytes as a shorter frame.
  * ------------------------------------------------------------------------- */
 #define CAN_MAX_DLC  8u
 
@@ -121,7 +121,7 @@ static void can_transmit_frame(uint8_t len)
  * @brief Accumulate one byte into the TX buffer.
  * A full 8-byte CAN frame is sent automatically every 8 bytes.
  */
-void sendSerial(uint8_t data)
+void X2CscopeComm_SendByte(uint8_t data)
 {
     tx_buf[tx_idx & (CAN_MAX_DLC - 1u)] = data;
 
@@ -135,9 +135,9 @@ void sendSerial(uint8_t data)
 
 /**
  * @brief Return one byte from the RX ring buffer.
- * Only called when isReceiveDataAvailable() has returned non-zero.
+ * Only called when X2CscopeComm_IsByteAvailable() has returned non-zero.
  */
-uint8_t receiveSerial(void)
+uint8_t X2CscopeComm_ReceiveByte(void)
 {
     return ringbuf_pop();
 }
@@ -146,7 +146,7 @@ uint8_t receiveSerial(void)
  * @brief Check whether at least one byte is waiting in the RX ring buffer.
  * @return true if RX data available, false otherwise.
  */
-bool isReceiveDataAvailable(void)
+bool X2CscopeComm_IsByteAvailable(void)
 {
     return !ringbuf_empty();
 }
@@ -155,7 +155,7 @@ bool isReceiveDataAvailable(void)
  * @brief Check whether the CAN TX queue can accept a new frame.
  * @return true if TX is possible, false if TX queue is full.
  */
-bool isSendReady(void)
+bool X2CscopeComm_IsSendReady(void)
 {
     return (CAN_TX_FIFO_AVAILABLE ==
             (CAN1_TransmitFIFOStatusGet(CAN1_TXQ) & CAN_TX_FIFO_AVAILABLE));
@@ -165,7 +165,7 @@ bool isSendReady(void)
  * @brief Send any remaining bytes as a partial CAN frame.
  * Called by the X2Cscope library at the end of each LNet frame.
  */
-void flushSerial(void)
+void X2CscopeComm_Flush(void)
 {
     uint8_t remainder = tx_idx & (CAN_MAX_DLC - 1u);
 

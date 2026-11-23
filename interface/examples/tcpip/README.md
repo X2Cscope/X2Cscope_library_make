@@ -57,11 +57,11 @@ with your Ethernet or Wi-Fi interface and the rest of the example is identical.
 X2Cscope uses a byte-stream protocol (LNet). TCP carries it natively — no
 additional framing is needed.
 
-- **TX:** `sendSerial()` accumulates bytes into a 516-byte buffer. `flushSerial()`
+- **TX:** `X2CscopeComm_SendByte()` accumulates bytes into a 516-byte buffer. `X2CscopeComm_Flush()`
   sends the buffer as a single TCP segment at the end of each LNet frame,
   minimising TCP overhead and preventing Nagle-algorithm delays.
 - **RX:** The TCP server receive callback (`receiveTcpData`) pushes incoming
-  bytes into a 256-byte circular buffer. `receiveSerial()` pops one byte at a
+  bytes into a 256-byte circular buffer. `X2CscopeComm_ReceiveByte()` pops one byte at a
   time when the library is ready to process it.
 
 ---

@@ -33,16 +33,16 @@
 /**
  * @brief Send one byte over UART.
  */
-void sendSerial(uint8_t data)
+void X2CscopeComm_SendByte(uint8_t data)
 {
     X2CScopeUart.Write(data);
 }
 
 /**
  * @brief Receive one byte from UART.
- * Only called when isReceiveDataAvailable() has returned non-zero.
+ * Only called when X2CscopeComm_IsByteAvailable() has returned non-zero.
  */
-uint8_t receiveSerial(void)
+uint8_t X2CscopeComm_ReceiveByte(void)
 {
     return X2CScopeUart.Read();
 }
@@ -51,7 +51,7 @@ uint8_t receiveSerial(void)
  * @brief Check whether at least one received byte is waiting.
  * @return true if RX data available, false otherwise.
  */
-bool isReceiveDataAvailable(void)
+bool X2CscopeComm_IsByteAvailable(void)
 {
     return X2CScopeUart.IsRxReady();
 }
@@ -60,12 +60,12 @@ bool isReceiveDataAvailable(void)
  * @brief Check whether the TX buffer can accept at least one more byte.
  * @return true if transmit is possible, false if TX buffer is full.
  */
-bool isSendReady(void)
+bool X2CscopeComm_IsSendReady(void)
 {
     return X2CScopeUart.IsTxReady();
 }
 
-/* flushSerial is not implemented for UART — NULL is passed to
+/* X2CscopeComm_Flush is not implemented for UART — NULL is passed to
  * X2Cscope_InitialiseEx() so the library skips the flush call entirely,
  * saving the function call overhead on every LNet frame. */
 

@@ -41,12 +41,12 @@
 #define X2CS_ASSERT_NOT_NULL(ptr) ((void)0)
 #endif
 
-// Static function pointers for UART/Serial interface
-static void    (*sendSerialFcn)(uint8_t);
-static uint8_t (*receiveSerialFcn)(void);
-static bool    (*isReceiveDataAvailableFcn)(void);
+// Static function pointers to the user's communication functions (X2Cscope_Config_t)
+static void    (*sendByteFcn)(uint8_t);
+static uint8_t (*receiveByteFcn)(void);
+static bool    (*isByteAvailableFcn)(void);
 static bool    (*isSendReadyFcn)(void);
-static void    (*flushSerialFcn)(void);
+static void    (*flushFcn)(void);
 
 void X2Cscope_Communicate() {
      protocol.pCommunicate((tProtocol*)&protocol);
@@ -62,19 +62,19 @@ void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config)
      * Each NULL check spins forever so a debugger catches the misconfiguration
      * immediately at the offending pointer. */
     X2CS_ASSERT_NOT_NULL(config);
-    X2CS_ASSERT_NOT_NULL(config->sendSerial);
-    X2CS_ASSERT_NOT_NULL(config->receiveSerial);
-    X2CS_ASSERT_NOT_NULL(config->isReceiveDataAvailable);
+    X2CS_ASSERT_NOT_NULL(config->sendByte);
+    X2CS_ASSERT_NOT_NULL(config->receiveByte);
+    X2CS_ASSERT_NOT_NULL(config->isByteAvailable);
     X2CS_ASSERT_NOT_NULL(config->isSendReady);
     X2CS_ASSERT_NOT_NULL(config->scopeArray);
     X2CS_ASSERT_NOT_NULL(config->compilationDate);
 
     /* Store communication function pointers */
-    sendSerialFcn             = config->sendSerial;
-    receiveSerialFcn          = config->receiveSerial;
-    isReceiveDataAvailableFcn = config->isReceiveDataAvailable;
-    isSendReadyFcn            = config->isSendReady;
-    flushSerialFcn            = config->flushSerial;  /* may be NULL — valid */
+    sendByteFcn        = config->sendByte;
+    receiveByteFcn     = config->receiveByte;
+    isByteAvailableFcn = config->isByteAvailable;
+    isSendReadyFcn     = config->isSendReady;
+    flushFcn           = config->flush;  /* may be NULL — valid */
 
     /* Initialise scope, LNet protocol, and version info */
     initTableStruct();
@@ -97,33 +97,35 @@ void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config)
     X2C_Init(config->scopeArray, config->scopeSize);
 }
 
-void sendSerialWrapper(tSerial* serial, uint8 data) {
-    sendSerialFcn((uint8_t) data);
+/* Adapters from the internal tSerial interface to the user's functions.
+ * static: only used here, so they add no global symbols to the application. */
+static void sendByteWrapper(tSerial* serial, uint8 data) {
+    sendByteFcn((uint8_t) data);
 }
 
-uint8_t receiveSerialWrapper(tSerial* serial) {
-    return (uint8) receiveSerialFcn();
+static uint8_t receiveByteWrapper(tSerial* serial) {
+    return (uint8) receiveByteFcn();
 }
 
-bool isReceiveDataAvailableWrapper(tSerial* serial) {
-    return isReceiveDataAvailableFcn();
+static bool isByteAvailableWrapper(tSerial* serial) {
+    return isByteAvailableFcn();
 }
 
-bool isSendReadyWrapper(tSerial* serial) {
+static bool isSendReadyWrapper(tSerial* serial) {
     return isSendReadyFcn();
 }
 
-void flushSerialWrapper(tSerial* serial) {
-    if (flushSerialFcn != NULL) {
-        flushSerialFcn();
+static void flushWrapper(tSerial* serial) {
+    if (flushFcn != NULL) {
+        flushFcn();
     }
 }
 
 void initSerial(tSerial* serial)
 {
-    serial->send = (void (*)(tInterface*, uint8))sendSerialWrapper;
-    serial->receive = (uint8 (*)(tInterface*))receiveSerialWrapper;
-    serial->isReceiveDataAvailable = (bool (*)(tInterface*))isReceiveDataAvailableWrapper;
+    serial->send = (void (*)(tInterface*, uint8))sendByteWrapper;
+    serial->receive = (uint8 (*)(tInterface*))receiveByteWrapper;
+    serial->isReceiveDataAvailable = (bool (*)(tInterface*))isByteAvailableWrapper;
     serial->isSendReady = (bool (*)(tInterface*))isSendReadyWrapper;
-    serial->flush = (void (*)(tInterface*))flushSerialWrapper;
+    serial->flush = (void (*)(tInterface*))flushWrapper;
 }

@@ -44,9 +44,10 @@ The old struct used `uint8_t[11]` / `uint8_t[8]`. These are now `char[12]` /
 `char[9]` to match the type and null-terminated length of `__DATE__` and
 `__TIME__`.
 
-### 5. `isReceiveDataAvailable` and `isSendReady` callbacks return `bool`
+### 5. "Byte available" and "send ready" callbacks return `bool`
 
-The return type of these two callbacks changed from `uint8_t` to `bool`.
+The return type of these two callbacks changed from `uint8_t` to `bool`
+(names as of this change; see section 7 for the current names).
 
 ```c
 /* Before */
@@ -70,6 +71,40 @@ function prototypes). The two configuration defaults are defined in
   `X2Cscope.c`, or the defaults (5000 bytes, `0x0001`) are used.
 - If your own code referenced either macro through `X2Cscope.h`, define it
   where you use it.
+
+### 7. Communication functions and config fields renamed
+
+The functions you implement in `X2CscopeComm.c` now use the `X2CscopeComm_`
+prefix, like `X2CscopeComm_PostInit()`. The old names (`sendSerial`,
+`receiveSerial`, ...) were global symbols that could clash with functions of
+the same name elsewhere in the application. "Serial" is also dropped, because
+the same functions are used for CAN and TCP/IP.
+
+| Old function | New function |
+|---|---|
+| `sendSerial(uint8_t)` | `X2CscopeComm_SendByte(uint8_t)` |
+| `receiveSerial(void)` | `X2CscopeComm_ReceiveByte(void)` |
+| `isReceiveDataAvailable(void)` | `X2CscopeComm_IsByteAvailable(void)` |
+| `isSendReady(void)` | `X2CscopeComm_IsSendReady(void)` |
+| `flushSerial(void)` | `X2CscopeComm_Flush(void)` |
+
+The matching `X2Cscope_Config_t` fields are renamed for consistency:
+
+| Old field | New field |
+|---|---|
+| `sendSerial` | `sendByte` |
+| `receiveSerial` | `receiveByte` |
+| `isReceiveDataAvailable` | `isByteAvailable` |
+| `isSendReady` | `isSendReady` (unchanged) |
+| `flushSerial` | `flush` |
+
+What to update:
+- Rename the five functions in your `X2CscopeComm.c` and in the arguments of
+  `X2CSCOPE_CONFIG_INIT()` in `X2Cscope.c`, or copy the new `interface/` files.
+- Use the new `interface/X2CscopeComm.h` with the new library; the field order
+  is unchanged, so `X2CSCOPE_CONFIG_INIT()` keeps the same argument order.
+- If you fill `X2Cscope_Config_t` by field name instead of with the macro,
+  use the new field names.
 
 ---
 
@@ -98,22 +133,22 @@ const compilationDate_t compilationDate = {__DATE__, __TIME__};
 void X2Cscope_Init(void)
 {
     X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
-        sendSerial,                 /* send one byte          (required) */
-        receiveSerial,              /* receive one byte       (required) */
-        isReceiveDataAvailable,     /* RX data ready flag     (required) */
-        isSendReady,                /* TX buffer not full     (required) */
-        flushSerial,                /* flush TX buffer        (NULL if unused) */
-        (void*)X2CscopeArray,       /* scope data buffer      (required) */
-        X2CSCOPE_BUFFER_SIZE,       /* scope buffer size      (required) */
-        X2CSCOPE_APP_VERSION,       /* app version identifier (required) */
-        compilationDate             /* build timestamp        (required) */
+        X2CscopeComm_SendByte,          /* send one byte          (required) */
+        X2CscopeComm_ReceiveByte,       /* receive one byte       (required) */
+        X2CscopeComm_IsByteAvailable,   /* RX data ready flag     (required) */
+        X2CscopeComm_IsSendReady,       /* TX buffer not full     (required) */
+        X2CscopeComm_Flush,             /* flush TX buffer        (NULL if unused) */
+        (void*)X2CscopeArray,           /* scope data buffer      (required) */
+        X2CSCOPE_BUFFER_SIZE,           /* scope buffer size      (required) */
+        X2CSCOPE_APP_VERSION,           /* app version identifier (required) */
+        compilationDate                 /* build timestamp        (required) */
     );
     X2Cscope_InitialiseEx(&config);
     X2CscopeComm_PostInit();
 }
 ```
 
-Pass `NULL` for `flushSerial` if your peripheral does not need an explicit
+Pass `NULL` for `X2CscopeComm_Flush` if your peripheral does not need an explicit
 flush step (e.g. a direct byte-at-a-time UART).
 
 ### Runtime calls
@@ -143,11 +178,11 @@ typedef struct compilationDate_type {
 
 ```c
 typedef struct {
-    void    (*sendSerial)(uint8_t);           /* Required */
-    uint8_t (*receiveSerial)(void);           /* Required */
-    bool    (*isReceiveDataAvailable)(void);  /* Required */
+    void    (*sendByte)(uint8_t);             /* Required */
+    uint8_t (*receiveByte)(void);             /* Required */
+    bool    (*isByteAvailable)(void);         /* Required */
     bool    (*isSendReady)(void);             /* Required */
-    void    (*flushSerial)(void);             /* Optional — NULL if unused */
+    void    (*flush)(void);                   /* Optional — NULL if unused */
     void*    scopeArray;                      /* Required */
     uint16_t scopeSize;                       /* Required */
     uint16_t appVersion;                      /* Required */

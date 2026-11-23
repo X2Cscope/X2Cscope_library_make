@@ -67,16 +67,16 @@ extern "C" {
  * Use with X2CSCOPE_CONFIG_INIT() macro and X2Cscope_InitialiseEx() for
  * single-call, compile-time-safe initialization.
  *
- * All function pointer fields except flushSerial are required (must not be NULL).
- * flushSerial is optional and may be set to NULL if not needed.
+ * All function pointer fields except flush are required (must not be NULL).
+ * flush is optional and may be set to NULL if not needed.
  */
 typedef struct {
-    /* Communication interface — all required except flushSerial */
-    void    (*sendSerial)(uint8_t);             /**< Required: Send one byte over serial */
-    uint8_t (*receiveSerial)(void);             /**< Required: Receive one byte from serial */
-    bool    (*isReceiveDataAvailable)(void);    /**< Required: Returns true when RX data is waiting */
+    /* Communication interface — all required except flush */
+    void    (*sendByte)(uint8_t);               /**< Required: Send one byte over serial */
+    uint8_t (*receiveByte)(void);               /**< Required: Receive one byte from serial */
+    bool    (*isByteAvailable)(void);           /**< Required: Returns true when RX data is waiting */
     bool    (*isSendReady)(void);               /**< Required: Returns true when TX buffer has space */
-    void    (*flushSerial)(void);               /**< Optional: Flush/commit TX buffer (set NULL if unused) */
+    void    (*flush)(void);                     /**< Optional: Flush/commit TX buffer (set NULL if unused) */
     /* Scope buffer */
     void*    scopeArray;                        /**< Required: Pointer to scope data buffer allocated by the application */
     uint16_t scopeSize;                         /**< Required: Size of scopeArray in bytes (see X2CSCOPE_BUFFER_SIZE in X2Cscope.c) */
@@ -95,10 +95,11 @@ typedef struct {
  * Usage:
  * @code
  *   X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
- *       sendSerial, receiveSerial, isReceiveDataAvailable, isSendReady,
- *       flushSerial,               // pass NULL if not needed
+ *       X2CscopeComm_SendByte, X2CscopeComm_ReceiveByte,
+ *       X2CscopeComm_IsByteAvailable, X2CscopeComm_IsSendReady,
+ *       X2CscopeComm_Flush,        // pass NULL if not needed
  *       (void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
-  *       X2CSCOPE_APP_VERSION, &compilationDate
+ *       X2CSCOPE_APP_VERSION, compilationDate   // macro takes the address
  *   );
  *   X2Cscope_InitialiseEx(&config);
  *   X2CscopeComm_PostInit();
@@ -107,11 +108,11 @@ typedef struct {
 #define X2CSCOPE_CONFIG_INIT(send_, recv_, rxAvail_, txReady_, flush_,  \
                              buf_, bufSize_, ver_, compDate_)           \
 {                                                                        \
-    .sendSerial               = (send_),                                 \
-    .receiveSerial            = (recv_),                                 \
-    .isReceiveDataAvailable   = (rxAvail_),                              \
+    .sendByte                 = (send_),                                 \
+    .receiveByte              = (recv_),                                 \
+    .isByteAvailable          = (rxAvail_),                              \
     .isSendReady              = (txReady_),                              \
-    .flushSerial              = (flush_),                                \
+    .flush                    = (flush_),                                \
     .scopeArray               = (buf_),                                  \
     .scopeSize                = (bufSize_),                              \
     .appVersion               = (ver_),                                  \
@@ -120,11 +121,11 @@ typedef struct {
 
 /* Functions below must be implemented by the X2Cscope user.
  * Typically in X2CscopeComm.c */
-void    sendSerial(uint8_t data);
-uint8_t receiveSerial(void);
-bool    isReceiveDataAvailable(void);
-bool    isSendReady(void);
-void    flushSerial(void);
+void    X2CscopeComm_SendByte(uint8_t data);
+uint8_t X2CscopeComm_ReceiveByte(void);
+bool    X2CscopeComm_IsByteAvailable(void);
+bool    X2CscopeComm_IsSendReady(void);
+void    X2CscopeComm_Flush(void);
 
 /**
  * @brief Single-call initialisation using a unified configuration struct.

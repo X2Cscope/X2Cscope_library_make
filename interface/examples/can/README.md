@@ -17,11 +17,11 @@ peripheral using an MCC Melody-generated CAN driver.
 X2Cscope uses a byte-stream protocol (LNet). CAN carries fixed-size frames,
 so the byte stream is packetized:
 
-- **TX:** `sendSerial()` accumulates bytes into an 8-byte buffer. A full CAN
-  frame is transmitted automatically every 8 bytes. `flushSerial()` sends any
+- **TX:** `X2CscopeComm_SendByte()` accumulates bytes into an 8-byte buffer. A full CAN
+  frame is transmitted automatically every 8 bytes. `X2CscopeComm_Flush()` sends any
   remaining bytes as a shorter frame at the end of each LNet frame.
 - **RX:** `X2CscopeComm_Communicate()` drains incoming CAN frames from the
-  hardware FIFO into a 32-byte software ring buffer. `receiveSerial()` pops one
+  hardware FIFO into a 32-byte software ring buffer. `X2CscopeComm_ReceiveByte()` pops one
   byte at a time from that buffer when the library is ready to process it.
 
 > **Important:** Call `X2CscopeComm_Communicate()` from your main loop instead
