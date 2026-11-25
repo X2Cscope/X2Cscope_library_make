@@ -102,10 +102,19 @@ void putRAMBlock(tProtocol* protocol)
 #error ADDRESS WIDTH NOT DEFINED
 #endif
 
+	/* request: [SID][address][type][data...] - the type byte is required */
+	if (protocol->ucFRAMESize < dataOffset)
+	{
+		sendError(protocol, ERRORFormat);
+		return;
+	}
+
 	size = protocol->ucFRAMESize - dataOffset;
 	type = protocol->ucFRAMEData[typeOffset];
 
-	if (size % type)
+	/* validate the type before size % type (type 0 would divide by zero) */
+	if (((type != DATATYPE_8BIT) && (type != DATATYPE_16BIT) && (type != DATATYPE_32BIT)) || \
+			((size % type) != (uint8)0))
 	{
 		sendError(protocol, ERRORFormat);
 		return;
@@ -166,7 +175,8 @@ void getRAMBlock(tProtocol* protocol)
 {
     void *addr;
     uint16 i;
-    uint8 size, type;
+    uint8 size = (uint8)0;
+    uint8 type;
     uint8 errorID = ERRORSuccess;
 #if defined(__ADDRESS_WIDTH_8BIT__)
     const uint8 addrOffset = (uint8)2;
@@ -178,17 +188,33 @@ void getRAMBlock(tProtocol* protocol)
 #error ADDRESS WIDTH NOT DEFINED
 #endif
 
-    size = protocol->ucFRAMEData[addrOffset];
-    type = protocol->ucFRAMEData[addrOffset + 1];
-
-    if (((uint16) size + 2) > protocol->ucMaxCommSize)
+    /* request: [SID][address][size][type] */
+    if (protocol->ucFRAMESize < (uint8)(addrOffset + 2))
     {
-        errorID = ERRORSizeTooLarge;
+        errorID = ERRORFormat;
     }
     else
     {
+        size = protocol->ucFRAMEData[addrOffset];
+        type = protocol->ucFRAMEData[addrOffset + 1];
+
+        /* only 8, 16 and 32 bit accesses, size must be a multiple of the type */
+        /* (otherwise the copy loops below write past the response)            */
+        if (((type != DATATYPE_8BIT) && (type != DATATYPE_16BIT) && (type != DATATYPE_32BIT)) || \
+                ((size % type) != (uint8)0))
+        {
+            errorID = ERRORFormat;
+        }
+        else if (((uint16) size + 2) > protocol->ucMaxCommSize)
+        {
+            errorID = ERRORSizeTooLarge;
+        }
+    }
+
+    if (errorID == ERRORSuccess)
+    {
 #if defined(__ADDRESS_WIDTH_8BIT__)
-    	addr = (void*) ((uint8) protocol->ucFRAMEData[1];
+    	addr = (void*) ((uint8) protocol->ucFRAMEData[1]);
 #elif defined(__ADDRESS_WIDTH_16BIT__)
         addr = (void*) ((uint16) protocol->ucFRAMEData[1] + \
                 ((uint16) protocol->ucFRAMEData[2] << 8));
@@ -268,7 +294,7 @@ void putBlockData(tProtocol* protocol)
 
 #if defined(__ADDRESS_WIDTH_8BIT__)
     const uint16 addrOffset = (uint8)2;
-    addr = (uint16*) ((uint8) protocol->ucFRAMEData[1];
+    addr = (uint16*) ((uint8) protocol->ucFRAMEData[1]);
 #elif defined(__ADDRESS_WIDTH_16BIT__)
     const uint16 addrOffset = (uint8)3;
     addr = (uint16*) ((uint16) protocol->ucFRAMEData[1] + \
@@ -324,7 +350,7 @@ void getBlockData(tProtocol* protocol)
     uint16 *addr;
 
 #if defined(__ADDRESS_WIDTH_8BIT__)
-    	addr = (uint16*) ((uint8) protocol->ucFRAMEData[1];
+    	addr = (uint16*) ((uint8) protocol->ucFRAMEData[1]);
 #elif defined(__ADDRESS_WIDTH_16BIT__)
         addr = (uint16*) ((uint16) protocol->ucFRAMEData[1] + \
                 ((uint16) protocol->ucFRAMEData[2] << 8));
