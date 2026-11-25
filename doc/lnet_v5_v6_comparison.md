@@ -2,7 +2,10 @@
 
 Sources:
 - *LNet Documentation*, LCM, March 3 2017 (LNet version 5, document version 5)
-- *LNet Documentation*, LCM, June 28 2023 (LNet version 6, document version 9), bundled in `pyx2cscope/mchplnet/doc/LNet.Doc_v6.pdf`
+- *LNet Documentation*, LCM, June 28 2023 (LNet version 6, document version 9)
+
+The LCM documents are not published in this repository (see [`README.md`](README.md)).
+- What X2Cscope implements on top of v5: [`lnet/x2cscope_lnet_profile.md`](lnet/x2cscope_lnet_profile.md)
 
 Current implementations:
 - **Firmware (this repo): LNet v5.** `DEVINFO_MONITOR_VERSION 0x0005` (`Services.c:45`), frame order `SYN SIZE NODE` (`LNet.h:50`), 8-bit SIZE, additive checksum.
@@ -139,18 +142,18 @@ v6 adds a note: the maximum target frame size is what the slave supports. Larger
 | 0x14 | Format error | ✓ | ✓ | ✓ |
 | 0x15 | Size too large | ✓ | ✓ | ✓ |
 | 0x21 | Service not available | ✓ | ✓ | ✓ |
-| 0x22 | Invalid DSP state | ✓ | ✓ | – |
+| 0x22 | Invalid DSP state | ✓ | ✓ | ✓ |
 | **0x23** | **Invalid data type** | – | new | – (uses 0x14 Format error) |
 | 0x30 | Flash write error | ✓ | ✓ | – |
 | 0x31 | Flash write protect error | ✓ | ✓ | – |
 | **0x32** | **Flash erase error** | – | new | – |
 | **0x33** | **Flash address alignment error** | – | new | – |
 | **0x34** | **Flash data error** | – | new | – |
-| 0x40 | Invalid Parameter ID | ✓ | ✓ | – |
+| 0x40 | Invalid Parameter ID | ✓ | ✓ | ✓ |
 | 0x41 | Invalid Block ID | ✓ | ✓ | ✓ |
 | 0x42 | Parameter limit error | ✓ | ✓ | ✓ |
-| 0x43 | Parameter table not initialized | ✓ | ✓ | – |
-| **0x44** | **Function table not initialized** | – | new | – |
+| 0x43 | Parameter table not initialized | ✓ | ✓ | ✓ |
+| **0x44** | **Function table not initialized** | – | new | ✓ (already sent today, although not in v5) |
 | **0x45** | **Inport Parameter table not initialized** | – | new | – |
 | **0x46** | **Outport Parameter table not initialized** | – | new | – |
 | **0x47** | **Mask Parameter table not initialized** | – | new | – |
@@ -159,7 +162,7 @@ v6 adds a note: the maximum target frame size is what the slave supports. Larger
 | 0x50 | Power-on error | ✓ | ✓ | – |
 | **0xFF** | **Unknown error** | – | new | – |
 
-The "Firmware" column marks the IDs this library's services actually send (`git grep ERROR… X2CScope/src`): 0x00, 0x13, 0x14, 0x15, 0x21, 0x41, 0x42. `Services.h:78-91` also defines 0x30, 0x31 and 0x50, which are unused.
+The "Firmware" column marks the IDs this library's services actually send, through the `ERROR…` and `SvError…` constants in `Services.h:78-91`: 0x00, 0x13, 0x14, 0x15, 0x21, 0x22, 0x40, 0x41, 0x42, 0x43, 0x44. The header also defines 0x30, 0x31 and 0x50, which are unused. See also `doc/lnet/x2cscope_lnet_profile.md` §8.
 
 ## 5 What v6 would bring to X2Cscope
 

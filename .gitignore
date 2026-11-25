@@ -13,6 +13,9 @@ _*/
 .claude/
 .vscode/
 
+# LCM LNet documents: not to be published, local copies only (see doc/README.md)
+doc/lnet/*.pdf
+
 *.o
 
 *.exe

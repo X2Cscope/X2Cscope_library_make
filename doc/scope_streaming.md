@@ -3,6 +3,8 @@
 Status: **draft** for issue #13. Firmware and host (mchplnet / pyX2Cscope) are implemented against this document.
 Draft 2 replaces the polled design of draft 1.
 
+This is an extension of the X2Cscope LNet profile ([`lnet/x2cscope_lnet_profile.md`](lnet/x2cscope_lnet_profile.md), §9), which is based on LNet v5 (*LNet Documentation*, LCM, LNet version 5; not published in this repository).
+
 ## 1 Overview
 
 - **The offline capture and streaming run at the same time:**
