@@ -1,6 +1,6 @@
 #!/bin/sh
-# Build and run the host tests on Linux (x86_64, gcc).
-# Run from the repository root, e.g. in a container:
+# Build and run the host tests on Linux (x86_64, gcc). See tests/host/README.md.
+# Run from the repository root, natively (Linux/WSL) or in a container:
 #   podman run --rm -v "$PWD:/src" -w /src docker.io/library/gcc:14 sh tests/host/run_host_tests.sh
 #
 # Each test is built twice:

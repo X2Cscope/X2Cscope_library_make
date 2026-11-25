@@ -1,0 +1,27 @@
+name: Host tests
+
+# Runs the library code on Linux x86_64 with gcc (no XC compiler needed).
+# See tests/host/README.md.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # AddressSanitizer of older gcc versions fails with the high ASLR entropy of recent kernels
+      - name: Allow AddressSanitizer
+        run: sudo sysctl vm.mmap_rnd_bits=28
+
+      - name: Run host tests (plain and ASan/UBSan)
+        run: |
+          gcc --version | head -n 1
+          sh tests/host/run_host_tests.sh
