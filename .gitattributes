@@ -1,0 +1,2 @@
+# Shell scripts run on Linux (CI, containers): always LF, also in Windows checkouts
+*.sh text eol=lf
