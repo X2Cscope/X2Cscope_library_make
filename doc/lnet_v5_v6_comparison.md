@@ -257,6 +257,8 @@ For comparison, streaming on v5 (issue #13): about 0.5–1 KB flash (estimate) a
 
 ## 7 Firmware bugs found during this comparison (independent of v6)
 
+**Fixed in v3.2** (issue #27, PR #28), together with a size underflow in `putRAMBlock` and missing request-length checks found while fixing them. The descriptions below refer to v3.1; the current behaviour is in `lnet/x2cscope_lnet_profile.md` §5.3.
+
 1. **Division by zero in `putRAMBlock`** (`BlockServicesX2C.c:105-108`): `size % type` is evaluated before `type` is validated. A request with data type `0` divides by zero (UsageFault on Cortex-M with divide-by-zero trapping enabled; undefined behaviour otherwise).
 2. **Buffer overflow in `getRAMBlock`** (`BlockServicesX2C.c:181-235`): `size % type` is not checked. With type 2 or 4 and a size that is not a multiple of it, the last loop iteration writes past `size`. Example: size 253, type 4 → writes `ucFRAMEData[254 … 257]`, but `bufferLNet[LNET_BUFFERSIZE]` has 255 bytes (indices 0–254, `X2CscopeWrapper.h:53-58`), so 3 bytes are written past the end.
 3. **Syntax error in the 8-bit address path** (`BlockServicesX2C.c:191`): `(void*) ((uint8) protocol->ucFRAMEData[1];` has a missing parenthesis. It is never compiled, because no target uses `__ADDRESS_WIDTH_8BIT__`.

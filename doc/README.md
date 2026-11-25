@@ -32,3 +32,4 @@ The X2Cscope documents are written so that the protocol as implemented by X2Csco
 - **Every protocol change updates the profile:** classify it (clarification, restriction, deviation, extension, known issue) and add a line to its revision history. A new extension also gets its own spec in this folder.
 - **Firmware and host are implemented against these documents**, not against each other.
 - **Example frames** in the documents are verified byte by byte. mchplnet's `tests/test_framing.py` uses the frames from the LNet v5 document and from `scope_streaming.md`.
+- **Behaviour described in the profile is tested** where possible by the host tests in `tests/host/` (run on every pull request; see `tests/host/README.md`).

@@ -1,6 +1,6 @@
 # X2Cscope LNet Profile
 
-**Profile revision 1** – describes the X2Cscope library v3.x (monitor version `0x0005`).
+**Profile revision 1** – describes the X2Cscope library v3.2 (monitor version `0x0005`).
 
 This document defines how the X2Cscope library implements LNet. It does **not** repeat the LNet specification.
 Read it together with the LCM document, which is not published in this repository (see [`../README.md`](../README.md)):
@@ -37,7 +37,7 @@ Every item in this profile is marked with one of:
 | Unsolicited frames with SYN `0x02` (online scope mode) | §3.1 ("reserved") | **Deviation** (legacy, non-functional) – to be replaced by the streaming extension |
 | Services 0x00–0x02, 0x07–0x0A, 0x11, 0x12 | §4 | Implemented, with clarifications (§5) |
 | Services 0x04, 0x0B, 0x0C, 0x19 | §4 | Not implemented |
-| Get/Put RAM Block | §4.7, §4.8 | Restriction (data types 1/2/4), **known issues** |
+| Get/Put RAM Block | §4.7, §4.8 | Restriction (data types 1/2/4); malformed requests → `0x14` (since v3.2) |
 | Load/Save Parameter | §4.11, §4.12 | Clarification: parameter ID 1 = scope block, layout in §6 |
 | Errors | §7 | Conformant, plus `0x44` (defined only in LNet v6) |
 | Scope streaming | – | Extension (draft) |
@@ -118,9 +118,17 @@ If the maximum frame size were below 46, the service would answer `0x15`. This c
 | Number of bytes (Get) | Clarification | 1 byte, at most 253 (frame size − Service ID − Error ID); larger → `0x15`. |
 | Data types | **Restriction** | `0x01`, `0x02`, `0x04`. Any other value (including `0x08`, 64-bit) → `0x14` Format error. 64-bit variables can be read as 8 × `0x01`. |
 | Byte order | Conformant | Values LSB first. |
-| Put: data length | Clarification | Frame size − header; must be a multiple of the data type, else `0x14`. |
-| **Known issue** | Get | `size % type` is not checked; with type 2/4 and a size that is not a multiple, up to 3 bytes are written past the 255-byte buffer (`BlockServicesX2C.c:181-235`). |
-| **Known issue** | Put | `size % type` is evaluated before `type` is checked; type `0x00` divides by zero (`BlockServicesX2C.c:105-108`). |
+| Put: data length | Clarification | Frame size − header; must be a multiple of the data type, else `0x14`. Length 0 is accepted (nothing written). |
+| Get: size alignment | Clarification | The number of bytes must be a multiple of the data type, else `0x14`. |
+| Request length | Clarification | Get needs Service ID, address, number of bytes and data type; Put needs Service ID, address and data type. Shorter requests → `0x14`. |
+| Validation order | Clarification | Request length, then data type, then alignment, then (Get) size limit `0x15`. Nothing is read from or written to target memory for a rejected request. |
+
+**Library v3.1 and earlier** did not validate these requests (issue #27, fixed in v3.2):
+- Get could write up to 3 bytes past the 255-byte LNet buffer.
+- Put divided by zero for data type `0x00`.
+- A Put request without type byte wrote up to 255 stale bytes to the target address.
+
+Hosts must not rely on the old behaviour. The validation is covered by `tests/host/test_ram_block_services.c`.
 
 ### 5.4 Load/Save Parameter (v5 §4.11, §4.12)
 
@@ -244,7 +252,6 @@ Service `0x16` and error `0x24` are unused in LNet v5 and v6, so the extension s
 ## 10 Open points
 
 - **Processor ID of the Cortex libraries:** they report `0x8220` (generic PIC32) because they are built with `__GENERIC_MICROCHIP_PIC32__`. The library already defines `0x8310` (generic ARMv7) and `0x8320` (generic ARMv6). Changing it needs host support first (pyX2Cscope uses the processor ID for the address width).
-- **Known issues** in Get/Put RAM Block (§5.3) to be fixed.
 - **Removal of OSM** (§3, §6.3) with the streaming extension.
 
 ## Appendix A – Processor identifiers (Microchip targets of this library)
@@ -276,4 +283,4 @@ Scope channel and trigger addresses (§6.2) and the TableStruct address (§5.1) 
 
 | Profile revision | Library | Changes |
 |---|---|---|
-| 1 | v3.x | First version: conformance to LNet v5, scope block definition, known issues, streaming extension (draft) |
+| 1 | v3.2 | First version: conformance to LNet v5, scope block definition, Get/Put RAM Block validation (#27), streaming extension (draft) |
