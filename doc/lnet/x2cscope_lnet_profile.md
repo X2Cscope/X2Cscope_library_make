@@ -1,6 +1,6 @@
 # X2Cscope LNet Profile
 
-**Profile revision 1** – describes the X2Cscope library v3.2 (monitor version `0x0005`).
+**Profile revision 2** – describes the X2Cscope library v3.2 and the changes for v3.3 on `develop` (monitor version `0x0005`).
 
 This document defines how the X2Cscope library implements LNet. It does **not** repeat the LNet specification.
 Read it together with the LCM document, which is not published in this repository (see [`../README.md`](../README.md)):
@@ -36,7 +36,8 @@ Every item in this profile is marked with one of:
 | Node identifier, frame size | §3.2, §4.1 | Clarification: node 1, maximum DATA size 255 |
 | Unsolicited frames with SYN `0x02` (online scope mode) | §3.1 ("reserved") | **Deviation** (legacy, non-functional) – to be replaced by the streaming extension |
 | Services 0x00–0x02, 0x07–0x0A, 0x11, 0x12 | §4 | Implemented, with clarifications (§5) |
-| Services 0x04, 0x0B, 0x0C, 0x19 | §4 | Not implemented |
+| Services 0x04, 0x0B, 0x0C | §4 | Not implemented |
+| Service 0x19 Reboot | §4.13 | Implemented through an optional application hook (since v3.3, §5.5) |
 | Get/Put RAM Block | §4.7, §4.8 | Restriction (data types 1/2/4); malformed requests → `0x14` (since v3.2) |
 | Load/Save Parameter | §4.11, §4.12 | Clarification: parameter ID 1 = scope block, layout in §6 |
 | Errors | §7 | Conformant, plus `0x44` (defined only in LNet v6) |
@@ -76,7 +77,7 @@ Every item in this profile is marked with one of:
 | 0x11 | Load Parameter | Implemented, clarified | §5.4, scope block §6 |
 | 0x12 | Save Parameter | Implemented, clarified | §5.4, scope block §6 |
 | 0x16 | Stream Control | **Extension (draft)** | §9 |
-| 0x19 | Reboot | Not implemented | |
+| 0x19 | Reboot | Implemented, clarified (since v3.3) | §5.5 |
 | 0x1A | (OSM control) | Not implemented | X2Cscope-internal ID, never registered. Reserved; to be removed with OSM. |
 
 Registration: `addCoreServices()` (`Services.c:567`), `addBlockServices()` and `addExtendedBlockServices()` (`BlockServicesX2C.c:50-68`). All other IDs up to `MAX_SERVICE_ID` (0x1A) answer `0x21`.
@@ -144,6 +145,19 @@ Hosts must not rely on the old behaviour. The validation is covered by `tests/ho
 | `0x41` | Block ID not in the function table |
 | `0x42` | Limit-save function failed |
 | `0x14` | Block save function rejected the data |
+
+### 5.5 Reboot (v5 §4.13) – since v3.3
+
+The library does not reset the device itself. It calls the application function `bool X2CscopeComm_Reboot(void)` (`interface/X2CscopeComm.h`), which brings the application into a safe state and resets the device. The library contains a weak default, so implementing the function is optional.
+
+| Situation | Answer |
+|---|---|
+| Application implements the function, returns `true` | **No response frame**, as LNet v5 requires on success. The device resets now or shortly afterwards. |
+| Application returns `false` (e.g. motor running) | `0x22` Invalid DSP state (**Clarification**: LNet v5 does not define a refusal) |
+| Application does not implement the function | `0x21` Service not available (as before v3.3) |
+| Request with service data | `0x14` Format error |
+
+After a service without response, the receiver is ready for the next frame (`LNet.c`). A host must not resend Reboot on a timeout: no answer means success. mchplnet's `LNet.reboot_device()` behaves accordingly.
 
 ## 6 Scope block (parameter ID 1, block ID `0xFFFF`) – Clarification
 
@@ -220,7 +234,7 @@ Error IDs the library sends (verified in `X2CScope/src`):
 | 0x14 | Format error | yes |
 | 0x15 | Size too large | yes |
 | 0x21 | Service not available | yes |
-| 0x22 | Invalid DSP state | yes |
+| 0x22 | Invalid DSP state (Set Target State; Reboot refused by the application since v3.3) | yes |
 | 0x40 | Invalid parameter ID | yes |
 | 0x41 | Invalid block ID | yes |
 | 0x42 | Parameter limit error | yes |
@@ -284,3 +298,4 @@ Scope channel and trigger addresses (§6.2) and the TableStruct address (§5.1) 
 | Profile revision | Library | Changes |
 |---|---|---|
 | 1 | v3.2 | First version: conformance to LNet v5, scope block definition, Get/Put RAM Block validation (#27), streaming extension (draft) |
+| 2 | v3.3 | Reboot (0x19) implemented through the optional application hook `X2CscopeComm_Reboot()` (#29) |
