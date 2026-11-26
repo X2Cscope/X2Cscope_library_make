@@ -221,6 +221,25 @@ Implement in `X2CscopeComm.c` for any steps that must follow library init
 (enabling UART TX interrupts, starting a TCP server, starting DMA, etc.).
 Leave the body empty if no post-init steps are needed.
 
+### `X2CscopeComm_Reboot` (optional)
+
+```c
+bool X2CscopeComm_Reboot(void);
+```
+
+Implement in `X2CscopeComm.c` if the host (e.g. pyX2Cscope) shall be able to
+reboot the device. Called from `X2Cscope_Communicate()`. Bring the application
+into a safe state (e.g. disable the power stage), then reset the device.
+
+| Return | Meaning |
+|---|---|
+| `true` | The device is reset (now or shortly afterwards). |
+| `false` | The reboot is not allowed now (e.g. motor running). |
+
+Optional: existing projects without this function keep working unchanged.
+`interface/X2CscopeComm.c` contains an example with the reset for dsPIC/PIC24,
+PIC32M and Cortex-M devices.
+
 ### `X2Cscope_Communicate`
 
 ```c

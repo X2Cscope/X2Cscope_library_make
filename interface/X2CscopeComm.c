@@ -144,6 +144,39 @@ void X2CscopeComm_Flush(void)
  * If using a buffer to send data, implement the buffer send/flush here.
  */
 }
+
+/**
+  @brief
+    Optional: reboot the device when requested from the host.
+    Bring the application into a safe state, then reset the device.
+  @return
+    true  -> the device is reset (now or shortly afterwards).
+    false -> the reboot is not allowed now (e.g. motor running).
+
+  Uncomment and adapt if the host shall be able to reboot the device:
+
+bool X2CscopeComm_Reboot(void)
+{
+    if (motorIsRunning())       // application specific: refuse in an unsafe state
+    {
+        return false;
+    }
+    disablePowerStage();        // application specific: bring outputs into a safe state
+
+    // dsPIC30/33, PIC24 (XC16 / XC-DSC):
+    __asm__ volatile ("reset");
+
+    // PIC32M (XC32):
+    // SYSKEY = 0x00000000; SYSKEY = 0xAA996655; SYSKEY = 0x556699AA;   // unlock
+    // RSWRSTSET = 1; (void)RSWRST;                                     // software reset
+    // while (1) {}
+
+    // Cortex-M (CMSIS, e.g. SAM, PIC32C/CK/CM/CZ):
+    // NVIC_SystemReset();
+
+    return true;                // not reached on a direct reset
+}
+ */
 /* *****************************************************************************
  End of File
  */
