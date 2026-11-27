@@ -59,21 +59,20 @@ typedef struct {
     .compilationDate          = &(compDate_)                              \
 }
 
-/* Callbacks implemented in X2CscopeComm.c */
+/* Required callbacks, implemented in X2CscopeComm.c */
 void    X2CscopeComm_SendByte(uint8_t data);
 uint8_t X2CscopeComm_ReceiveByte(void);
 bool    X2CscopeComm_IsByteAvailable(void);
 bool    X2CscopeComm_IsSendReady(void);
-void    X2CscopeComm_Flush(void);
 
 /* Library function implemented in the X2Cscope .a */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
 
-/** User-implemented comm-layer post-init, called from X2Cscope_Init(). */
-void X2CscopeComm_PostInit(void);
-
-/* Optional: reboot the device when requested from the host, see interface/X2CscopeComm.h. */
-bool X2CscopeComm_Reboot(void);
+/* Optional hooks: the X2Cscope library contains a default for each, see interface/X2CscopeComm.h.
+ * This example implements X2CscopeComm_Flush() and X2CscopeComm_PostInit() in X2CscopeComm.c. */
+void    X2CscopeComm_Flush(void);
+void    X2CscopeComm_PostInit(void);
+bool    X2CscopeComm_ResetDevice(void);
 
 #ifdef __cplusplus
 }

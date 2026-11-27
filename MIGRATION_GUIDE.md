@@ -106,6 +106,22 @@ What to update:
 - If you fill `X2Cscope_Config_t` by field name instead of with the macro,
   use the new field names.
 
+### 8. `X2CscopeComm_Flush()` and `X2CscopeComm_PostInit()` are optional (not breaking)
+
+The library contains a default (empty) implementation of both functions, like
+for `X2CscopeComm_ResetDevice()`. Implement them in `X2CscopeComm.c` only if you
+need them; your implementation replaces the default. Existing projects that
+implement them keep working unchanged.
+
+- `X2CscopeComm_Flush()`: needed if the peripheral buffers TX data (e.g. CAN,
+  TCP/IP). Not needed for a UART that sends byte by byte.
+- `X2CscopeComm_PostInit()`: needed for steps after `X2Cscope_InitialiseEx()`,
+  e.g. starting a TCP server or enabling the UART TX interrupt.
+
+The name must match exactly: a misspelled function is not an error, the default
+is used instead. With a library archive (`.a`) older than this change, both
+functions must still be implemented.
+
 ---
 
 ## Current API
@@ -137,7 +153,7 @@ void X2Cscope_Init(void)
         X2CscopeComm_ReceiveByte,       /* receive one byte       (required) */
         X2CscopeComm_IsByteAvailable,   /* RX data ready flag     (required) */
         X2CscopeComm_IsSendReady,       /* TX buffer not full     (required) */
-        X2CscopeComm_Flush,             /* flush TX buffer        (NULL if unused) */
+        X2CscopeComm_Flush,             /* flush TX buffer        (optional, default: nothing) */
         (void*)X2CscopeArray,           /* scope data buffer      (required) */
         X2CSCOPE_BUFFER_SIZE,           /* scope buffer size      (required) */
         X2CSCOPE_APP_VERSION,           /* app version identifier (required) */
@@ -148,8 +164,10 @@ void X2Cscope_Init(void)
 }
 ```
 
-Pass `NULL` for `X2CscopeComm_Flush` if your peripheral does not need an explicit
-flush step (e.g. a direct byte-at-a-time UART).
+`X2CscopeComm_Flush()` and `X2CscopeComm_PostInit()` are optional (section 8):
+if you do not implement them, the library's empty defaults are used. If you call
+`X2Cscope_InitialiseEx()` with your own config, you can also pass `NULL` for the
+flush function.
 
 ### Runtime calls
 
@@ -210,31 +228,43 @@ void X2Cscope_InitialiseEx(const X2Cscope_Config_t *config);
 Validates required fields (debug builds), hooks the communication interface,
 and initializes the scope buffer. Call once from `X2Cscope_Init()`.
 
-### `X2CscopeComm_PostInit`
+### `X2CscopeComm_Flush` (optional)
+
+```c
+void X2CscopeComm_Flush(void);
+```
+
+Called when a frame is complete. Implement in `X2CscopeComm.c` if the
+peripheral buffers TX data (e.g. one CAN frame or one TCP segment per flush).
+Default: does nothing.
+
+### `X2CscopeComm_PostInit` (optional)
 
 ```c
 void X2CscopeComm_PostInit(void);
 ```
 
-User-implemented, called from `X2Cscope_Init()` after `X2Cscope_InitialiseEx()`.
+Called from `X2Cscope_Init()` after `X2Cscope_InitialiseEx()`.
 Implement in `X2CscopeComm.c` for any steps that must follow library init
 (enabling UART TX interrupts, starting a TCP server, starting DMA, etc.).
-Leave the body empty if no post-init steps are needed.
+Default: does nothing.
 
-### `X2CscopeComm_Reboot` (optional)
+### `X2CscopeComm_ResetDevice` (optional)
 
 ```c
-bool X2CscopeComm_Reboot(void);
+bool X2CscopeComm_ResetDevice(void);
 ```
 
 Implement in `X2CscopeComm.c` if the host (e.g. pyX2Cscope) shall be able to
-reboot the device. Called from `X2Cscope_Communicate()`. Bring the application
-into a safe state (e.g. disable the power stage), then reset the device.
+reset the device. Called from `X2Cscope_Communicate()`.
+
+> **Warning:** when this function resets the device, the running application
+> stops immediately and all outputs go to their reset state.
 
 | Return | Meaning |
 |---|---|
 | `true` | The device is reset (now or shortly afterwards). |
-| `false` | The reboot is not allowed now (e.g. motor running). |
+| `false` | The device cannot be reset now for any safety reason. |
 
 Optional: existing projects without this function keep working unchanged.
 `interface/X2CscopeComm.c` contains an example with the reset for dsPIC/PIC24,

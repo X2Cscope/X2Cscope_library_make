@@ -50,24 +50,7 @@ Copyright (c) [2012-2020] Microchip Technology Inc.
  */
 #include "X2CscopeComm.h"
 
-/**
-  @brief
-    Comm-layer post-init. Called from X2Cscope_Init() after
-    X2Cscope_InitialiseEx(). Implement for any steps that must follow
-    library init (e.g. start TCP server, enable UART TX interrupt).
- */
-void X2CscopeComm_PostInit(void)
-{
-#error "Implement your post-init function, then delete this line."
-/* Example:
- * If no extra handling is required, leave this function empty.
- *
- * Common use cases:
- * - Enable UART TX interrupt
- * - Start DMA transfers
- * - Initialize protocol-specific state
- */
-}
+/* ---- Required functions ------------------------------------------------- */
 
 /**
   @brief
@@ -130,39 +113,50 @@ bool X2CscopeComm_IsSendReady()
 */
 }
 
-/** 
-  @brief
-    Flush the transmit buffer. This function is called when LNet frame is complete.
-   @param[in] serial Serial interface object. (Not used)
-   @param[in] data Data to send 
+/* ---- Optional hooks -------------------------------------------------------
+ * The X2Cscope library contains a default for each function below. Uncomment
+ * and adapt only the ones you need; the name must match exactly, otherwise the
+ * default is used.
  */
-void X2CscopeComm_Flush(void)
-{
-#error "Implement your flush function, then delete this line."
-/* Example:
- * If no extra handling is required, leave this function empty.
- * If using a buffer to send data, implement the buffer send/flush here.
- */
-}
 
 /**
   @brief
-    Optional: reboot the device when requested from the host.
-    Bring the application into a safe state, then reset the device.
+    Send the bytes collected by X2CscopeComm_SendByte(). Called when a frame is
+    complete. Needed if the peripheral buffers TX data (e.g. CAN, TCP/IP).
+    Default: does nothing.
+
+void X2CscopeComm_Flush(void)
+{
+    // send the buffered bytes, e.g. one CAN frame or one TCP segment
+}
+ */
+
+/**
+  @brief
+    Called from X2Cscope_Init() after X2Cscope_InitialiseEx(), for steps that
+    must follow library init (e.g. start a TCP server, enable the UART TX
+    interrupt, start DMA transfers).
+    Default: does nothing.
+
+void X2CscopeComm_PostInit(void)
+{
+    // e.g. enable the UART TX interrupt
+}
+ */
+
+/**
+  @brief
+    Reset the device when requested from the host.
+
+    WARNING: when this function resets the device, the running application stops
+    immediately and all outputs go to their reset state.
   @return
     true  -> the device is reset (now or shortly afterwards).
-    false -> the reboot is not allowed now (e.g. motor running).
+    false -> the device cannot be reset now for any safety reason.
+    Default: the device is not reset; the host is told that the reset is not supported.
 
-  Uncomment and adapt if the host shall be able to reboot the device:
-
-bool X2CscopeComm_Reboot(void)
+bool X2CscopeComm_ResetDevice(void)
 {
-    if (motorIsRunning())       // application specific: refuse in an unsafe state
-    {
-        return false;
-    }
-    disablePowerStage();        // application specific: bring outputs into a safe state
-
     // dsPIC30/33, PIC24 (XC16 / XC-DSC):
     __asm__ volatile ("reset");
 

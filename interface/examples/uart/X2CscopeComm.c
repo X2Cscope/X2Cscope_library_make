@@ -65,9 +65,8 @@ bool X2CscopeComm_IsSendReady(void)
     return X2CScopeUart.IsTxReady();
 }
 
-/* X2CscopeComm_Flush is not implemented for UART — NULL is passed to
- * X2Cscope_InitialiseEx() so the library skips the flush call entirely,
- * saving the function call overhead on every LNet frame. */
+/* X2CscopeComm_Flush() is not implemented for UART: each byte is sent by X2CscopeComm_SendByte(),
+ * so the library's default (empty) X2CscopeComm_Flush() is used. */
 
 /**
  * @brief Comm-layer post-init, called from X2Cscope_Init() after

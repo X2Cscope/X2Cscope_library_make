@@ -5,7 +5,8 @@ Tests that run the library code (`X2CScope/src`) on a PC instead of a microcontr
 | Test | Covers |
 |---|---|
 | `test_ram_block_services.c` | LNet Get/Put RAM Block (`BlockServicesX2C.c`): valid requests, malformed requests, no write past the LNet frame buffer, no write to target memory for rejected requests |
-| `test_reboot_service.c` | LNet Reboot through the whole library (`X2Cscope_InitialiseEx()` + `X2Cscope_Communicate()` with an in-memory transport). Built without an application `X2CscopeComm_Reboot()` (library default answers 0x21) and with one (refused → 0x22; accepted → no response, the next request is still answered); request with service data → 0x14 |
+| `test_reset_service.c` | Device reset (LNet Reboot service) through the whole library (`X2Cscope_InitialiseEx()` + `X2Cscope_Communicate()` with an in-memory transport). Built without an application `X2CscopeComm_ResetDevice()` (library default answers 0x21) and with one (cannot reset → 0x22; accepted → no response, the next request is still answered); request with service data → 0x14 |
+| `test_optional_hooks.c` | Optional hooks `X2CscopeComm_Flush()` / `X2CscopeComm_PostInit()`, linked like an application: `interface/X2Cscope.c` plus the library as a static archive. Built without the hooks (the archive's weak defaults are used, Get Device Info is answered) and with them (PostInit called once, Flush once per response frame) |
 
 Every test is built twice: plain (reports every failed check) and with AddressSanitizer and UndefinedBehaviorSanitizer (aborts on the first memory or undefined-behaviour error).
 
