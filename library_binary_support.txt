@@ -36,10 +36,33 @@ projects, but uses double-precision FPU instructions that these cores do not
 have; it faults at runtime (scope trigger on a double channel). Never use
 the cm7 library on a device without a double-precision FPU.
 
+PIC24: which library for which device
+-------------------------------------
+The three PIC24 libraries are not interchangeable. The choice depends on
+whether the device has Extended Data Space (EDS), not on the "DA" in the
+library name. The device pack records this in the device's .PIC file as
+edc:extendeddataspace ("PIC24FP", "PIC24EP" or not present); the device
+data sheet describes EDS in its memory organization chapter.
+
+  Device type                    Library                                    Example families
+  -----------------------------  -----------------------------------------  ------------------------
+  PIC24F without EDS             libx2cscope-generic-16bit-pic24-elf.a      PIC24FJ GA0/GA1/GB0/GB1,
+                                                                            PIC24F KA/KL/KM
+  PIC24F with EDS (PIC24FP)      libx2cscope-generic-16bit-pic24f_da-elf.a  PIC24FJ DA, GA2, GA6, GA7,
+                                                                            GB2, GB6, GC, GL, GP, GU
+  PIC24E/PIC24EP (PIC24EP)       libx2cscope-generic-16bit-pic24e-elf.a     PIC24EP GP/GU/MC
+  any of the above               libx2cscope2-generic-pic24-dspic33-elf.a   (combined archive)
+
+With the wrong library the linker does not report an architecture error; it
+skips the archive and reports undefined references to X2Cscope_Communicate,
+X2Cscope_Update and X2Cscope_InitialiseEx. Example: PIC24FJ1024GB610 (GB6,
+with EDS) does not link with libx2cscope-generic-16bit-pic24-elf.a; use
+libx2cscope-generic-16bit-pic24f_da-elf.a or the combined archive.
+
 Binary: libx2cscope-generic-16bit-pic24-elf.a
 Build file: generic-16bit.mk
 Processor option: -mcpu=generic-16bit
-Supports: Generic 16-bit PIC24 devices
+Supports: PIC24F devices without Extended Data Space (EDS)
 
 Binary: libx2cscope-generic-16bit-pic24e-elf.a
 Build file: generic-16bit-ep.mk
@@ -49,7 +72,7 @@ Supports: PIC24E/PIC24EP devices
 Binary: libx2cscope-generic-16bit-pic24f_da-elf.a
 Build file: generic-16bit-da.mk
 Processor option: -mcpu=generic-16bit-da
-Supports: PIC24F-DA devices
+Supports: PIC24F devices with Extended Data Space (EDS), not only PIC24FJ DA
 
 Binary: libx2cscope2-generic-16dsp-dspic33f-dspic30-elf.a
 Build file: generic-16dsp.mk
@@ -160,3 +183,21 @@ Notes
    PIC32CK2051SG01064) with XC32 v4.60. They were link-tested with
    ATSAMD21G18A, PIC32CM6408PL10048, PIC32CM5164LE00048, ATSAME54N20A,
    ATSAME70N20B, ATSAMV71Q21B and PIC32CK2051SG01064 projects.
+6. The PIC24 table above was link-tested with XC-DSC v4.00 against all four
+   PIC24-capable archives, with these devices:
+     without EDS: PIC24FJ128GA010, PIC24FJ64GA104, PIC24FJ64GB004,
+                  PIC24FJ256GB110, PIC24FV32KA304, PIC24F16KL402,
+                  PIC24F16KM202
+     PIC24FP EDS: PIC24FJ128GA204, PIC24FJ1024GA606, PIC24FJ256GA705,
+                  PIC24FJ64GB202, PIC24FJ1024GB610, PIC24FJ256DA210,
+                  PIC24FJ128GC010, PIC24FJ128GL306, PIC24FJ64GP205,
+                  PIC24FJ64GU205, PIC24FJ512GU410
+     PIC24EP EDS: PIC24EP256GP206, PIC24EP512GU810, PIC24EP256MC206,
+                  PIC24EP64MC202
+   Each device linked with exactly the library of its row and with the
+   combined archive, and with none of the other two PIC24 libraries.
+7. The library itself needs about 500 bytes of RAM in addition to the scope
+   buffer (X2CSCOPE_BUFFER_SIZE, default 5000 bytes, set in X2Cscope.c).
+   On small devices (e.g. PIC24F KA/KL/KM with 1-2 KB RAM) reduce the buffer,
+   e.g. -DX2CSCOPE_BUFFER_SIZE=300; otherwise the link fails with "Could not
+   allocate data memory".

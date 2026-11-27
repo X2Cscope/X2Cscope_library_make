@@ -235,6 +235,12 @@ static void communicate(tLNet* protocol)
 						/* elements are function pointers */
 						svTable = (tSERVICEFunction*)protocol->pServiceTable;
 						svTable[protocol->ucFrameData[0]]((tProtocol*)protocol);
+						/* A service that sends no response (Reboot service: reset accepted) leaves receive enabled:
+						   wait for the next frame instead of staying in the CRC state. */
+						if (protocol->ucCommState == RECEIVE_ALLOWED)
+						{
+							protocol->ucRcvState = LNET_STATE_SYN;
+						}
 					}
 					else
 					{

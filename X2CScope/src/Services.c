@@ -40,6 +40,7 @@
  */
 #include "Services.h"
 #include "../../interface/X2Cscope.h"  /* compilationDate_t — full definition needed to dereference framePrgCompDateTime */
+#include "../../interface/X2CscopeComm.h"  /* X2CscopeComm_ResetDevice() */
 
 /* monitor program version */
 #define DEVINFO_MONITOR_VERSION ((uint16)0x0005)
@@ -244,7 +245,22 @@ static void getTargetState(tProtocol* protocol);
 static void setTargetState(tProtocol* protocol);
 static void loadParameter(tProtocol* protocol);
 static void saveParameter(tProtocol* protocol);
+static void resetDevice(tProtocol* protocol);
 static void* getBlockAddress(const tParameterTable* paramTable, uint16 paramId, uint8* error);
+
+/* Set by the default X2CscopeComm_ResetDevice(): the application does not implement the reset */
+static bool resetNotImplemented;
+
+/*
+ * Default reset hook, used if the application does not implement X2CscopeComm_ResetDevice()
+ * (weak symbol: a function of the same name in the application replaces it).
+ * The LNet Reboot service is then answered with "Service not available" (0x21).
+ */
+__attribute__((weak)) bool X2CscopeComm_ResetDevice(void)
+{
+	resetNotImplemented = true;
+	return false;
+}
 
 /* send service not available error */
 void sendSvNotAvailable(tProtocol* protocol)
@@ -534,6 +550,29 @@ static void setTargetState(tProtocol* protocol)
 }
 
 /*
+ * LNet Reboot service (LNet v5 4.13): resets the target through X2CscopeComm_ResetDevice().
+ * No service data in request or response. In case of success no response frame is sent. Errors:
+ * 0x14 format error (request with service data), 0x21 reset not implemented by the
+ * application, 0x22 the application cannot reset now (X2CscopeComm_ResetDevice() returned false).
+ */
+static void resetDevice(tProtocol* protocol)
+{
+	if (protocol->ucFRAMESize != (uint8)1)
+	{
+		sendError(protocol, ERRORFormat);
+		return;
+	}
+
+	resetNotImplemented = false;
+	if (X2CscopeComm_ResetDevice())
+	{
+		/* Reset accepted (the application resets now or shortly): no response frame */
+		return;
+	}
+	sendError(protocol, resetNotImplemented ? ERRORServiceNotAvail : SvErrorInvalidDspState);
+}
+
+/*
  * Returns target state.
  */
 static void getTargetState(tProtocol* protocol)
@@ -572,6 +611,7 @@ void addCoreServices(tProtocol* protocol)
 	svTable[SV_ID_SETTARGETSTATE] = setTargetState;
 	svTable[SV_ID_SVSAVEPARAM] = saveParameter;
 	svTable[SV_ID_SVLOADPARAM] = loadParameter;
+	svTable[SV_ID_SVREBOOT] = resetDevice;
 }
 
 /*

@@ -68,7 +68,8 @@ extern "C" {
  * single-call, compile-time-safe initialization.
  *
  * All function pointer fields except flush are required (must not be NULL).
- * flush is optional and may be set to NULL if not needed.
+ * flush is optional and may be set to NULL if not needed. X2Cscope_Init()
+ * (X2Cscope.c) passes X2CscopeComm_Flush, which has a default (see below).
  */
 typedef struct {
     /* Communication interface — all required except flush */
@@ -97,7 +98,7 @@ typedef struct {
  *   X2Cscope_Config_t config = X2CSCOPE_CONFIG_INIT(
  *       X2CscopeComm_SendByte, X2CscopeComm_ReceiveByte,
  *       X2CscopeComm_IsByteAvailable, X2CscopeComm_IsSendReady,
- *       X2CscopeComm_Flush,        // pass NULL if not needed
+ *       X2CscopeComm_Flush,        // optional hook with a default, or NULL
  *       (void*)X2CscopeArray, X2CSCOPE_BUFFER_SIZE,
  *       X2CSCOPE_APP_VERSION, compilationDate   // macro takes the address
  *   );
@@ -119,13 +120,13 @@ typedef struct {
     .compilationDate          = &(compDate_)                             \
 }
 
-/* Functions below must be implemented by the X2Cscope user.
- * Typically in X2CscopeComm.c */
+/* ---- Required: implement in X2CscopeComm.c ------------------------------ */
 void    X2CscopeComm_SendByte(uint8_t data);
 uint8_t X2CscopeComm_ReceiveByte(void);
 bool    X2CscopeComm_IsByteAvailable(void);
 bool    X2CscopeComm_IsSendReady(void);
-void    X2CscopeComm_Flush(void);
+
+/* ---- Implemented in the X2Cscope library -------------------------------- */
 
 /**
  * @brief Single-call initialisation using a unified configuration struct.
@@ -133,19 +134,46 @@ void    X2CscopeComm_Flush(void);
  * Validates required fields (in debug builds), hooks the communication
  * interface, and initialises the scope buffer — all in one call.
  * Follow with X2CscopeComm_PostInit() for any peripheral-level post-init steps.
- * Implemented in the X2Cscope library.
  */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
 
+/* ---- Optional application hooks -----------------------------------------
+ * The X2Cscope library contains a default for each of these functions.
+ * To replace a default, implement the function in X2CscopeComm.c with exactly
+ * this name and signature (the prototype checks the signature, not the name:
+ * a misspelled name silently keeps the default). See X2CscopeComm.c for
+ * examples.
+ */
+
 /**
- * @brief User-level post-initialization function.
- * User-implemented comm-layer post-init. Called from X2Cscope_Init() after
- * X2Cscope_InitialiseEx(). Implement in X2CscopeComm.c for any steps that
- * must follow library init: starting the TCP server, enabling UART TX
+ * @brief Send the bytes collected by X2CscopeComm_SendByte(), called when a
+ * frame is complete. Needed if the peripheral buffers TX data (e.g. CAN, TCP/IP).
+ * Default: does nothing.
+ */
+void X2CscopeComm_Flush(void);
+
+/**
+ * @brief Called from X2Cscope_Init() after X2Cscope_InitialiseEx(), for steps
+ * that must follow library init: starting the TCP server, enabling UART TX
  * interrupts, starting DMA transfers, etc.
- * If no post-init steps are needed, leave the body empty.
+ * Default: does nothing.
  */
 void X2CscopeComm_PostInit(void);
+
+/**
+ * @brief Reset the device when requested from the host.
+ *
+ * WARNING: when this function resets the device, the running application stops
+ * immediately and all outputs go to their reset state.
+ *
+ * Called from X2Cscope_Communicate().
+ *
+ * @return true  if the device is reset (now or shortly afterwards).
+ * @return false if the device cannot be reset now for any safety reason.
+ *
+ * Default: the device is not reset; the host is told that the reset is not supported.
+ */
+bool X2CscopeComm_ResetDevice(void);
 
 #ifdef __cplusplus
 }
