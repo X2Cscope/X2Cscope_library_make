@@ -147,22 +147,18 @@ void X2CscopeComm_Flush(void)
 
 /**
   @brief
-    Optional: reboot the device when requested from the host.
-    Bring the application into a safe state, then reset the device.
+    Optional: reset the device when requested from the host.
+
+    WARNING: when this function resets the device, the running application stops
+    immediately and all outputs go to their reset state.
   @return
     true  -> the device is reset (now or shortly afterwards).
-    false -> the reboot is not allowed now (e.g. motor running).
+    false -> the device cannot be reset now for any safety reason.
 
-  Uncomment and adapt if the host shall be able to reboot the device:
+  Uncomment and adapt if the host shall be able to reset the device:
 
-bool X2CscopeComm_Reboot(void)
+bool X2CscopeComm_ResetDevice(void)
 {
-    if (motorIsRunning())       // application specific: refuse in an unsafe state
-    {
-        return false;
-    }
-    disablePowerStage();        // application specific: bring outputs into a safe state
-
     // dsPIC30/33, PIC24 (XC16 / XC-DSC):
     __asm__ volatile ("reset");
 

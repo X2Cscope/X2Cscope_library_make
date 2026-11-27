@@ -37,6 +37,6 @@ run_test ram_block_services "tests/host/test_ram_block_services.c X2CScope/src/B
 LIBRARY="$(ls X2CScope/src/*.c | tr '\n' ' ')"
 CFLAGS_LIB_BACKUP=$CFLAGS
 CFLAGS="$CFLAGS -Wno-error -w -Wno-error=incompatible-pointer-types"
-run_test reboot_service_default "tests/host/test_reboot_service.c $LIBRARY"
-run_test reboot_service_app "tests/host/test_reboot_service.c $LIBRARY" "-DAPP_REBOOT"
+run_test reset_service_default "tests/host/test_reset_service.c $LIBRARY"
+run_test reset_service_app "tests/host/test_reset_service.c $LIBRARY" "-DAPP_RESET"
 CFLAGS=$CFLAGS_LIB_BACKUP

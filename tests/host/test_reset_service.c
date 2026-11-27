@@ -1,14 +1,14 @@
 /*
- * Host test for the LNet Reboot service (0x19), through the whole library:
+ * Host test for the device reset through the LNet Reboot service (0x19), through the whole library:
  * X2Cscope_InitialiseEx() + X2Cscope_Communicate() with an in-memory transport.
  *
  * Built twice (see run_host_tests.sh):
- *   without -DAPP_REBOOT: the application has no X2CscopeComm_Reboot(); the library's weak
- *                         default answers 0x21 Service not available.
- *   with    -DAPP_REBOOT: the application implements X2CscopeComm_Reboot():
- *                         refused -> 0x22 Invalid DSP state; accepted -> no response frame,
- *                         and the next request is still answered (receiver ready again).
- * Both: Reboot with service data -> 0x14 Format error.
+ *   without -DAPP_RESET: the application has no X2CscopeComm_ResetDevice(); the library's weak
+ *                        default answers 0x21 Service not available.
+ *   with    -DAPP_RESET: the application implements X2CscopeComm_ResetDevice():
+ *                        cannot reset -> 0x22 Invalid DSP state; accepted -> no response frame,
+ *                        and the next request is still answered (receiver ready again).
+ * Both: Reboot request with service data -> 0x14 Format error.
  */
 #include <stdio.h>
 #include <string.h>
@@ -30,13 +30,13 @@ bool X2CscopeComm_IsSendReady(void) { return true; }
 void X2CscopeComm_Flush(void) { }
 void X2CscopeComm_PostInit(void) { }
 
-#ifdef APP_REBOOT
-static bool acceptReboot;
-static int rebootCalls;
-bool X2CscopeComm_Reboot(void)
+#ifdef APP_RESET
+static bool acceptReset;
+static int resetCalls;
+bool X2CscopeComm_ResetDevice(void)
 {
-    rebootCalls++;
-    return acceptReboot;    /* a real application resets the device here */
+    resetCalls++;
+    return acceptReset;    /* a real application resets the device here */
 }
 #endif
 
@@ -87,8 +87,9 @@ static int isDeviceInfoResponse(void)
     return txLen >= 50u && txBuf[0] == 0x55 && txBuf[1] == 0x2E && txBuf[3] == 0x00 && txBuf[4] == 0x00;
 }
 
-static const uint8_t REBOOT[] = { 0x55, 0x01, 0x01, 0x19, 0x70 };
-static const uint8_t REBOOT_WITH_DATA[] = { 0x55, 0x02, 0x00, 0x01, 0x19, 0x00, 0x71 };
+/* LNet Reboot service request, without and with (invalid) service data */
+static const uint8_t RESET_REQUEST[] = { 0x55, 0x01, 0x01, 0x19, 0x70 };
+static const uint8_t RESET_REQUEST_WITH_DATA[] = { 0x55, 0x02, 0x00, 0x01, 0x19, 0x00, 0x71 };
 static const uint8_t DEVICE_INFO[] = { 0x55, 0x01, 0x01, 0x00, 0x57 };
 
 /* ---------------------------------------------------------------- main */
@@ -105,33 +106,33 @@ int main(void)
     X2Cscope_InitialiseEx(&config);
 
     request(DEVICE_INFO, sizeof(DEVICE_INFO));
-    check(isDeviceInfoResponse(), "device info before reboot", "no valid response");
+    check(isDeviceInfoResponse(), "device info before reset", "no valid response");
 
-    request(REBOOT_WITH_DATA, sizeof(REBOOT_WITH_DATA));
-    check(isErrorResponse(0x19, 0x14), "reboot with service data", "expected 0x14 Format error");
+    request(RESET_REQUEST_WITH_DATA, sizeof(RESET_REQUEST_WITH_DATA));
+    check(isErrorResponse(0x19, 0x14), "reset with service data", "expected 0x14 Format error");
 
-#ifndef APP_REBOOT
-    request(REBOOT, sizeof(REBOOT));
-    check(isErrorResponse(0x19, 0x21), "reboot, no application hook", "expected 0x21 Service not available");
+#ifndef APP_RESET
+    request(RESET_REQUEST, sizeof(RESET_REQUEST));
+    check(isErrorResponse(0x19, 0x21), "reset, no application hook", "expected 0x21 Service not available");
 #else
-    acceptReboot = false;
-    request(REBOOT, sizeof(REBOOT));
-    check(rebootCalls == 1, "reboot refused", "hook not called once");
-    check(isErrorResponse(0x19, 0x22), "reboot refused", "expected 0x22 Invalid DSP state");
+    acceptReset = false;
+    request(RESET_REQUEST, sizeof(RESET_REQUEST));
+    check(resetCalls == 1, "reset not possible", "hook not called once");
+    check(isErrorResponse(0x19, 0x22), "reset not possible", "expected 0x22 Invalid DSP state");
 
-    acceptReboot = true;
-    request(REBOOT, sizeof(REBOOT));
-    check(rebootCalls == 2, "reboot accepted", "hook not called");
-    check(txLen == 0, "reboot accepted", "a response frame was sent (LNet v5: none on success)");
+    acceptReset = true;
+    request(RESET_REQUEST, sizeof(RESET_REQUEST));
+    check(resetCalls == 2, "reset accepted", "hook not called");
+    check(txLen == 0, "reset accepted", "a response frame was sent (LNet v5: none on success)");
 
     /* the receiver must be ready for the next frame (deferred reset in the application) */
     request(DEVICE_INFO, sizeof(DEVICE_INFO));
-    check(isDeviceInfoResponse(), "device info after accepted reboot",
+    check(isDeviceInfoResponse(), "device info after accepted reset",
           "no valid response: receiver stuck after a service without response");
 #endif
 
     printf("%s: %d of %d checks failed (%s)\n", failures ? "FAILED" : "PASSED", failures, checks,
-#ifdef APP_REBOOT
+#ifdef APP_RESET
            "with application hook"
 #else
            "library default"
