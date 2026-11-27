@@ -48,6 +48,23 @@ static bool    (*isByteAvailableFcn)(void);
 static bool    (*isSendReadyFcn)(void);
 static void    (*flushFcn)(void);
 
+/*
+ * Default application hooks (weak symbols: a function of the same name in the application replaces
+ * them). They live in this file because it is always linked (X2Cscope_InitialiseEx()), so the
+ * defaults are found in a static library too. interface/X2Cscope.c passes X2CscopeComm_Flush and
+ * calls X2CscopeComm_PostInit() by name; without these defaults the application would have to
+ * implement both even when it does not need them.
+ */
+__attribute__((weak)) void X2CscopeComm_Flush(void)
+{
+    /* nothing to flush: the bytes were sent by X2CscopeComm_SendByte() */
+}
+
+__attribute__((weak)) void X2CscopeComm_PostInit(void)
+{
+    /* no post-init steps */
+}
+
 void X2Cscope_Communicate() {
      protocol.pCommunicate((tProtocol*)&protocol);
 }

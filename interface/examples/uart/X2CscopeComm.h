@@ -56,20 +56,19 @@ typedef struct {
     .compilationDate          = &(compDate_)                              \
 }
 
-/* Callbacks implemented in X2CscopeComm.c */
+/* Required callbacks, implemented in X2CscopeComm.c */
 void X2CscopeComm_SendByte(uint8_t data);
 uint8_t X2CscopeComm_ReceiveByte(void);
 bool X2CscopeComm_IsByteAvailable(void);
 bool X2CscopeComm_IsSendReady(void);
-/* X2CscopeComm_Flush is not needed for UART — NULL is passed to X2Cscope_InitialiseEx() */
 
 /* Library function implemented in the X2Cscope .a */
 void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
 
-/** User-implemented comm-layer post-init, called from X2Cscope_Init(). */
+/* Optional hooks: the X2Cscope library contains a default for each, see interface/X2CscopeComm.h.
+ * This example implements X2CscopeComm_PostInit() (UART TX interrupt); the default X2CscopeComm_Flush() is used. */
+void X2CscopeComm_Flush(void);
 void X2CscopeComm_PostInit(void);
-
-/* Optional: reset the device when requested from the host, see interface/X2CscopeComm.h. */
 bool X2CscopeComm_ResetDevice(void);
 
 #ifdef __cplusplus

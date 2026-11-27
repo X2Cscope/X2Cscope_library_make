@@ -39,4 +39,14 @@ CFLAGS_LIB_BACKUP=$CFLAGS
 CFLAGS="$CFLAGS -Wno-error -w -Wno-error=incompatible-pointer-types"
 run_test reset_service_default "tests/host/test_reset_service.c $LIBRARY"
 run_test reset_service_app "tests/host/test_reset_service.c $LIBRARY" "-DAPP_RESET"
+
+# Library as a static archive, linked like an application with interface/X2Cscope.c: the weak defaults
+# of the optional hooks must be found in the archive.
+rm -f "$out"/lib_*.o "$out/libx2cscope_host.a"
+for src in $LIBRARY; do
+    gcc $CFLAGS $DEFINES $INCLUDES -c "$src" -o "$out/lib_$(basename "$src" .c).o"
+done
+ar rcs "$out/libx2cscope_host.a" "$out"/lib_*.o
+run_test optional_hooks_default "tests/host/test_optional_hooks.c interface/X2Cscope.c $out/libx2cscope_host.a"
+run_test optional_hooks_app "tests/host/test_optional_hooks.c interface/X2Cscope.c $out/libx2cscope_host.a" "-DAPP_HOOKS"
 CFLAGS=$CFLAGS_LIB_BACKUP
