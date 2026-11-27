@@ -148,16 +148,16 @@ Hosts must not rely on the old behaviour. The validation is covered by `tests/ho
 
 ### 5.5 Reboot (v5 §4.13) – since v3.3
 
-The library does not reset the device itself. It calls the application function `bool X2CscopeComm_Reboot(void)` (`interface/X2CscopeComm.h`), which brings the application into a safe state and resets the device. The library contains a weak default, so implementing the function is optional.
+The library does not reset the device itself. It calls the application function `bool X2CscopeComm_ResetDevice(void)` (`interface/X2CscopeComm.h`), which resets the device. The library contains a weak default, so implementing the function is optional.
 
 | Situation | Answer |
 |---|---|
 | Application implements the function, returns `true` | **No response frame**, as LNet v5 requires on success. The device resets now or shortly afterwards. |
-| Application returns `false` (e.g. motor running) | `0x22` Invalid DSP state (**Clarification**: LNet v5 does not define a refusal) |
+| Application returns `false` (the device cannot be reset now) | `0x22` Invalid DSP state (**Clarification**: LNet v5 does not define a refusal) |
 | Application does not implement the function | `0x21` Service not available (as before v3.3) |
 | Request with service data | `0x14` Format error |
 
-After a service without response, the receiver is ready for the next frame (`LNet.c`). A host must not resend Reboot on a timeout: no answer means success. mchplnet's `LNet.reboot_device()` behaves accordingly.
+After a service without response, the receiver is ready for the next frame (`LNet.c`). A host must not resend Reboot on a timeout: no answer means success. mchplnet's `LNet.reset_device()` behaves accordingly.
 
 ## 6 Scope block (parameter ID 1, block ID `0xFFFF`) – Clarification
 
@@ -298,4 +298,4 @@ Scope channel and trigger addresses (§6.2) and the TableStruct address (§5.1) 
 | Profile revision | Library | Changes |
 |---|---|---|
 | 1 | v3.2 | First version: conformance to LNet v5, scope block definition, Get/Put RAM Block validation (#27), streaming extension (draft) |
-| 2 | v3.3 | Reboot (0x19) implemented through the optional application hook `X2CscopeComm_Reboot()` (#29) |
+| 2 | v3.3 | Reboot (0x19) implemented through the optional application hook `X2CscopeComm_ResetDevice()` (#29, #31) |
