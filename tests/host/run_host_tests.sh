@@ -15,12 +15,28 @@ CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-int-to-pointer
 SANITIZE="-fsanitize=address,undefined -fno-sanitize=integer-divide-by-zero -fno-sanitize-recover=all"
 DEFINES="-D__GENERIC_X86__"
 INCLUDES="-IX2CScope/inc -Iinterface"
-SOURCES="tests/host/test_ram_block_services.c X2CScope/src/BlockServicesX2C.c"
 
-gcc $CFLAGS $DEFINES $INCLUDES $SOURCES -o "$out/test_plain"
-gcc $CFLAGS $SANITIZE $DEFINES $INCLUDES $SOURCES -o "$out/test_sanitized"
+# run_test <name> "<sources>" ["<extra defines>"]
+run_test() {
+    name=$1
+    sources=$2
+    extra=$3
+    gcc $CFLAGS $DEFINES $extra $INCLUDES $sources -o "$out/${name}_plain"
+    gcc $CFLAGS $SANITIZE $DEFINES $extra $INCLUDES $sources -o "$out/${name}_sanitized"
+    echo "== $name: plain build"
+    "$out/${name}_plain"
+    echo "== $name: sanitized build (ASan + UBSan)"
+    ASAN_OPTIONS=handle_sigfpe=0 "$out/${name}_sanitized"
+}
 
-echo "== plain build"
-"$out/test_plain"
-echo "== sanitized build (ASan + UBSan)"
-ASAN_OPTIONS=handle_sigfpe=0 "$out/test_sanitized"
+run_test ram_block_services "tests/host/test_ram_block_services.c X2CScope/src/BlockServicesX2C.c"
+
+# Whole library; the known library warnings (pointer/int casts of the 32-bit LNet addresses on a
+# 64-bit host, TableStruct.c:72 and Scope_Main.h:58 pointer types, which gcc >= 14 reports as
+# errors by default) are not errors here.
+LIBRARY="$(ls X2CScope/src/*.c | tr '\n' ' ')"
+CFLAGS_LIB_BACKUP=$CFLAGS
+CFLAGS="$CFLAGS -Wno-error -w -Wno-error=incompatible-pointer-types"
+run_test reboot_service_default "tests/host/test_reboot_service.c $LIBRARY"
+run_test reboot_service_app "tests/host/test_reboot_service.c $LIBRARY" "-DAPP_REBOOT"
+CFLAGS=$CFLAGS_LIB_BACKUP

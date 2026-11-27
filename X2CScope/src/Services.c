@@ -40,6 +40,7 @@
  */
 #include "Services.h"
 #include "../../interface/X2Cscope.h"  /* compilationDate_t — full definition needed to dereference framePrgCompDateTime */
+#include "../../interface/X2CscopeComm.h"  /* X2CscopeComm_Reboot() */
 
 /* monitor program version */
 #define DEVINFO_MONITOR_VERSION ((uint16)0x0005)
@@ -244,7 +245,22 @@ static void getTargetState(tProtocol* protocol);
 static void setTargetState(tProtocol* protocol);
 static void loadParameter(tProtocol* protocol);
 static void saveParameter(tProtocol* protocol);
+static void reboot(tProtocol* protocol);
 static void* getBlockAddress(const tParameterTable* paramTable, uint16 paramId, uint8* error);
+
+/* Set by the default X2CscopeComm_Reboot(): the application does not implement reboot */
+static bool rebootNotImplemented;
+
+/*
+ * Default reboot hook, used if the application does not implement X2CscopeComm_Reboot()
+ * (weak symbol: a function of the same name in the application replaces it).
+ * Reboot is then answered with "Service not available" (0x21).
+ */
+__attribute__((weak)) bool X2CscopeComm_Reboot(void)
+{
+	rebootNotImplemented = true;
+	return false;
+}
 
 /* send service not available error */
 void sendSvNotAvailable(tProtocol* protocol)
@@ -534,6 +550,29 @@ static void setTargetState(tProtocol* protocol)
 }
 
 /*
+ * Reboots the target (LNet v5 4.13): no service data in request or response.
+ * In case of success no response frame is sent. Errors:
+ * 0x14 format error (request with service data), 0x21 reboot not implemented by the
+ * application, 0x22 the application refused (X2CscopeComm_Reboot() returned false).
+ */
+static void reboot(tProtocol* protocol)
+{
+	if (protocol->ucFRAMESize != (uint8)1)
+	{
+		sendError(protocol, ERRORFormat);
+		return;
+	}
+
+	rebootNotImplemented = false;
+	if (X2CscopeComm_Reboot())
+	{
+		/* Reboot accepted (the application resets now or shortly): no response frame */
+		return;
+	}
+	sendError(protocol, rebootNotImplemented ? ERRORServiceNotAvail : SvErrorInvalidDspState);
+}
+
+/*
  * Returns target state.
  */
 static void getTargetState(tProtocol* protocol)
@@ -572,6 +611,7 @@ void addCoreServices(tProtocol* protocol)
 	svTable[SV_ID_SETTARGETSTATE] = setTargetState;
 	svTable[SV_ID_SVSAVEPARAM] = saveParameter;
 	svTable[SV_ID_SVLOADPARAM] = loadParameter;
+	svTable[SV_ID_SVREBOOT] = reboot;
 }
 
 /*

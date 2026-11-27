@@ -147,6 +147,19 @@ void X2Cscope_InitialiseEx(const X2Cscope_Config_t* config);
  */
 void X2CscopeComm_PostInit(void);
 
+/**
+ * @brief Optional: reboot the device when requested from the host.
+ *
+ * Called from X2Cscope_Communicate(). Bring the application into a safe state
+ * (e.g. disable the power stage), then reset the device.
+ *
+ * @return true  if the device is reset (now or shortly afterwards).
+ * @return false if the reboot is not allowed now (e.g. motor running).
+ *
+ * Implementing this function is optional. See X2CscopeComm.c for an example.
+ */
+bool X2CscopeComm_Reboot(void);
+
 #ifdef __cplusplus
 }
 #endif
