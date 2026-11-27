@@ -30,3 +30,5 @@ motorbench-log.0.0.txt.lck
 *.log
 *.log
 *.bak
+# Release package (scripts/make_release.ps1), uploaded to the GitHub release by hand
+*.zip

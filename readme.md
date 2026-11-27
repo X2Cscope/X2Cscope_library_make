@@ -32,6 +32,9 @@ Open cmd in the root folder and execute "make" command. The main makefile will c
 #### **Clean**
 Execute "make clean" to delete all obj and lib files.
 
+#### **Release package**
+Execute `powershell -ExecutionPolicy Bypass -File scripts\make_release.ps1 -Tag v3.3` (with the release tag). The script rebuilds all libraries with the compiler versions pinned in the makefile, checks that every archive was built, and creates `dist/libx2cscope3-elf_v3_3.zip` with the libraries and the `interface/` files. Upload the zip to the GitHub release page. `-SkipBuild` packages the archives in `dist/` without rebuilding.
+
 ### 3. How to create new/custom target
 If new target or custom configuration(Scope_size) required just duplicate one of the \*.mk file and modify the following variables to the needs:
 1. TARGET_FILENAME - The output filename. (Will be located in the dist folder after compilation.)

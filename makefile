@@ -8,7 +8,7 @@ NUM_OF_PARALLEL_JOBS := 4
 LIB_OUT_DIR_PATH := dist/
 
 # compilers (can be overridden on the command line, e.g. make XC32_CC=...)
-# Keep the versions in sync with .github/workflows/release.yml
+# scripts/make_release.ps1 checks that these versions are installed
 XC32_VERSION  := v4.60
 XCDSC_VERSION := v4.00
 
@@ -43,7 +43,7 @@ TOPTARGETS := all clean release
 
 all: $(TARGETS) combine
 
-# Full rebuild of every archive in dist/. Used by the GitHub release workflow.
+# Full rebuild of every archive in dist/. Used by scripts/make_release.ps1.
 release:
 	$(MAKE) clean
 	$(MAKE)
